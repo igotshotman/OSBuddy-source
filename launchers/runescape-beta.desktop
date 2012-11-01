@@ -4,7 +4,7 @@ Type=Application
 Name=RuneScape EoC beta
 GenericName=RuneScape EoC beta
 Comment=The RuneScape Unix Client
-Icon=runescape.png
+Icon=/usr/share/icons/hicolor/scalable/apps/runescape.png
 Terminal=false
 Exec=runescape --prmfile=runescape-beta.prm
 Categories=GNOME;GTK;Game;
