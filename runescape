@@ -24,8 +24,8 @@ use FindBin;
 # Get script directory
 my $cwd = $FindBin::RealBin;
 
-# Include perl modules in ./modules/client_modules
-use lib $FindBin::RealBin."/modules/client_modules";
+# Include perl modules in ./modules
+use lib $FindBin::RealBin."./modules";
 require rsu_modules;
 
 # Create a variable to store mutators inside for use as
