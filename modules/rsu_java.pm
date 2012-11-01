@@ -12,9 +12,10 @@ package rsu_java;
 		# Define the variable for javabin
 		my $javabin;
 		
-		# Define a variable to contain a boolean(true/false) to see if OpenJDK exists
+		# Define a variable to contain a boolean (true/false) to see if OpenJDK exists
 		my $openjdk;
 		
+		# We are on Linux
 		# Print debug info
 		print "You are running ".$rsu_data->OS.", I will probe for OpenJDK6 or newer\nand use the newest version if possible.\n\n";
 			
@@ -24,52 +25,52 @@ package rsu_java;
 		# run "find /usr/lib/jvm/ -name java" to see if we can find OpenJDK by using grep
 		$openjdk = `find -L /usr/lib/jvm/ -name "java" |grep -P "$preferredjava(|-amd64|-i386|-\$\(uname -i\))/bin"`;
 			
-		# if $openjdk is found
+		# if $openjdk is found (hurray!)
 		if ($openjdk =~ /java-\d{1,1}-openjdk(|-\$\(uname -p\)|-i386|-amd64)/)
 		{
 			# Print debug info
 			print "Found OpenJDK files, now checking for the newest installed one.\n";
-				
+			
 			# Split the string by newline incase OpenJDK-7 was found
 			my @openjdkbin = split /\n/, $openjdk;
-				
+			
 			# Print debug info
 			print "Checking which OpenJDK versions are installed...\n\n";
-				
+			
 			# Run a check to see if we detected OpenJDK7
 			my $detectedopenjdk7 = grep { $openjdkbin[$_] =~ /java-\d{1,1}-openjdk-(\$\(uname -p\)|i386|amd64)/ } 0..$#openjdkbin;
-				
+			
 			# If OpenJDK7 was not found
 			#if ($openjdkbin[$index] !~ /java-\d{1,1}-openjdk-(\$\(uname -p\)|i386|amd64)/)
 			if($detectedopenjdk7 =~ /0/)
 			{
 				# Print debug info
 				print "OpenJDK6 detected!, I will use this to run the client!\n";
-					
-				# we will use OpenJDK6 to launch it (OpenJDK does not have sfx problems like sun-java)
+				
+				# we will use OpenJDK6 to launch it (OpenJDK does not have SFX problems like Sun-Java)
 				$javabin = "$openjdkbin[0] ";
 			}
 			else
 			{
 				# Print debug info
 				print "OpenJDK7 detected!, I will use this to run the client!\n";
-					
+			
 				# Find the index of OpenJDK7
 				my @openjdk7index = grep { $openjdkbin[$_] =~ /java-\d{1,1}-openjdk-(\$\(uname -p\)|i386|amd64)/ } 0..$#openjdkbin;
-					
+				
 				# We will use OpenJDK7 to launch it (OpenJDK does not have SFX problems like Sun-Java)
 				$javabin = "$openjdkbin[$openjdk7index[0]] ";
 			}
+		}		
 		else
-			{
-				# Print debug info
-				print "I did not find any version of OpenJDK in /usr/lib/jvm\nI will instead use the default Java in \$PATH\n";
-				
-				# if OpenJDK is not found then we will use default Java (let's pray it is in the $PATH)
-				$javabin = "java";
-			}
+		{
+			# Print debug info
+			print "I did not find any version of OpenJDK in /usr/lib/jvm\nI will instead use the default Java in \$PATH\n";
+			
+			# if OpenJDK is not found then we will use default Java (lets pray it is in the $PATH)
+			$javabin = "java";
 		}
-	
+		
 		# Return to call with the Java executable
 		return $javabin;
 	}
@@ -86,7 +87,7 @@ package rsu_java;
 		# Pass the binary to a variable so we can use it in commands
 		my $java_binary = $rsu_data->javabin;
 		
-		# Execute Java -help and see if this Java has the -client parameter available
+		# Execute java -help and see if this Java have the -client parameter available
 		my $results = `$java_binary -help 2>&1`;
 		
 		# If the -client parameter is an option
@@ -109,12 +110,22 @@ package rsu_java;
 		# Get the data container
 		my $rsu_data = shift;
 		
-		# Make a variable for the location of the Java in $PATH
+		# Make a variable for the location of the Java in path
 		my $whereisjava;
 		
-		# Ask where the Java executable is
-		$whereisjava = `whereis java | sed s/java:\\ // | sed s/\\ .*//`;
-
+		# If our os is linux or freebsd
+		if ($rsu_data->OS =~ /(linux|freebsd)/)
+		{
+			# Ask where the Java executable is
+			$whereisjava = `whereis java | sed s/java:\\ // | sed s/\\ .*//`;
+		}
+		# Else if we are on solaris
+		elsif($rsu_data->OS =~ /(solaris)/)
+		{
+			# Return the default symlink location (since solaris have the libjli.so linked properly)
+			return "/usr/bin/java";
+		}
+		
 		# Make a variable to contain the testing results
 		my $test_exec;
 		
@@ -152,7 +163,7 @@ package rsu_java;
 		}
 		
 		# Do a final check to see if the Java binary is found...
-		# If $whereisjava does not end with /bin/java then
+		# If $whereisjava do not end with /bin/java then
 		if ($whereisjava !~ /\/bin\/java$/)
 		{
 			# Run a function which will tell the user what to do in order to fix this issue
@@ -200,13 +211,13 @@ $cwd/share/settings.conf file.
 
 java_not_binary_message
 		
-		# Make a variable to contain the new java path
+		# Make a variable to contain the new Java path
 		my $newjavapath;
 		
-		# If we are inside an interactive shell then
+		# if we are inside an interactive shell then
 		if (-t STDOUT)
 		{
-			# Write the java notice to a file
+			# Write the Java notice to a file
 			rsu_IO::WriteFile($java_not_bin, ">", "/tmp/java_notice.txt");
 			
 			# Display the message
@@ -215,21 +226,21 @@ java_not_binary_message
 			# Wait for user to press ENTER/RETURN
 			my $continue = <STDIN>;
 			
-			# Remove the notice
+			# remove the notice
 			system "rm /tmp/java_notice.txt";
 			
-			# Read the preferred java in the config file, if nothing is found then say JAVA NOT SET
+			# Read the preferred Java in the config file, if nothing is found then say JAVA NOT SET
 			$newjavapath = readconf("preferredjava", "JAVA NOT SET");		
 		}
 		else
 		{
-			# Write the java notice to a file
+			# Write the Java notice to a file
 			WriteFile($java_not_bin, ">", "/tmp/java_notice.txt");
 			
-			# Run script in urxvt so we can get input from user and with right permissions
-			system "urxvt -e \"cat /tmp/java_notice.txt && read i\"";
+			# run script in xterm so we can get input from user and with right permissions
+			system "xterm -e \"cat /tmp/java_notice.txt && read i\"";
 			
-			# Remove the notice
+			# remove the notice
 			system "rm /tmp/java_notice.txt";
 			
 			# Read the preferred Java in the config file, if nothing is found then say JAVA NOT SET
@@ -239,7 +250,7 @@ java_not_binary_message
 		# If Java is still not set
 		if ($newjavapath =~ /JAVA NOT SET/)
 		{
-			# Tell user what's wrong and then exit
+			# Tell user whats wrong and then exit
 			print "You did not set the path to Java in the preferredjava setting\ninside ".$rsu_data->cwd."/share/settings.conf\nThe client will not work for you without this setting... EXITING!\n";
 			exit
 		}
@@ -248,7 +259,4 @@ java_not_binary_message
 		return "$newjavapath";
 	}
 
-	#
-	#---------------------------------------- *** ----------------------------------------
-	#
 1;
