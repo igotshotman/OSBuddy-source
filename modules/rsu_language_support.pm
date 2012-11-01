@@ -30,7 +30,7 @@ package rsu_lang;
 			$lang = "@$lang";
 			
 			# Print debug info
-			print "File read and this is the content I found!\n######## File Start ########\n\n$lang\n######## File End ########\n\n";
+			print "File read and this is the content I found:\n######## File Start ########\n\n$lang\n######## File End ########\n\n";
 		}
 		
 		# Print debug info
