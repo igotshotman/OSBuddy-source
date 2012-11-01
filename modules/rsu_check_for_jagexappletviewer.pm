@@ -21,7 +21,7 @@ package rsu_cfjav;
 		if ($jarcheckresult !~ /jagexappletviewer.jar/)
 		{
 			# Make a variable containing the path to the update script
-			my $updatescript = "\"$cwd/update-runescape-client\"";
+			my $updatescript = "\"$cwd/runescape-update-client\"";
 			
 			# Execute the updater
 			system "$updatescript";
