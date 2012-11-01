@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Runescape Client Updater
+GenericName=Runescape Client Updater
+Comment=Update the runescape client
+Icon=update-runescape.png
+Terminal=false
+Exec=urxvt -e \"update-runescape-client\"
+Categories=GNOME;GTK;Game;

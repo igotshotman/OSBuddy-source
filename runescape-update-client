@@ -1,0 +1,304 @@
+#!/usr/bin/perl -w
+
+my $windowsurl = "http://www.runescape.com/downloads/runescape.msi";
+
+# Be strict to avoid messy code
+use strict;
+
+# Use FindBin module to get script directory
+use FindBin;
+
+# Get script directory
+my $cwd = $FindBin::RealBin;
+
+# Make a variable to contain the client directory
+my $clientdir = $cwd;
+
+# Detect the current OS
+my $OS = "$^O";
+
+# Make a variable to contain the temponairly %PATH% variable
+my $win32path;
+
+# Make a variable to contain if the user ran script as root or not
+my $isroot;
+
+# Make a variable to contain the users home folder
+my $HOME;
+
+# Check if we are root
+$isroot = `whoami`;
+	
+# Get users homefolder
+$HOME = $ENV{"HOME"};
+
+# Make variable to contain the 7zip binary name
+my $zipbin = "7z";
+	
+# Define the variable to wait for the user to press Enter to exit
+my $exit;
+			
+# Check if updates requires root permission but we dont have it
+#if ($cwd =~ /^(\/opt*|\/usr\/s?bin*|\/bin*)/ && $isroot !~ /root/)
+#{
+	# if we are inside an interactive shell then
+#	if (-t STDOUT)
+#	{
+		# Run script as root
+#		system ("sudo perl \"$cwd/update-runescape-client\"");
+#	}
+#	else
+#	{
+		# run script in urxvt so we can get input from user and with right permissions
+#		system ("urxvt -e \"echo The client is in a location that requires && echo superuser permissions to change && sudo perl \\\"$cwd/update-runescape-client\\\"\"");
+#	}
+	# Exit once we are done
+#	exit
+#}
+
+
+# If we are inside an interactive shell then
+if (-t STDOUT)
+{
+	
+	# If this script have been installed systemwide
+	if ($cwd =~ /^(\/usr\/s?bin|\/opt\/runescape|\/usr\/local\/s?bin)/)
+	{
+		# change $cwd to the system installation location
+		$cwd = "/opt/runescape";
+		
+		# change $clientdir to ~/.config/runescape
+		$clientdir = "$HOME/.config/runescape/";
+		
+		# Make the client folders
+		system "mkdir -p \"$HOME/.config/runescape/bin\" && mkdir -p \"$HOME/.config/runescape/share\"";
+	}
+
+	# run the script
+	main();
+}
+# else
+else
+{
+	# run script in urxvt so we can get input from user
+	system ("urxvt -e \"perl $cwd/update-runescape-client\"");
+}
+
+sub main
+{
+	# Show user a notice about jagexappletviewer.jar
+	print "Due to \"Legal Reasons\" the file jagexappletviewer.jar is not \navailable/downloadable in certain countries. For this script \nto work you must be able to download at LEAST one of the \nOfficial RuneScape Clients for extraction!\n\n";
+	
+	# Ask what type of update to run
+	print "What type of update do you want to run?\n [1] Update jagexappletviewer.jar (from Jagex) by using the\n     official Windows client, then ask to update the scripts. (default)\n\n";
+	
+	# If the script is not located in /opt
+	if ($cwd !~ /^(\/usr\/s?bin|\/opt\/runescape|\/usr\/local\/s?bin)/)
+	{
+		# Show the 2rd option
+		print " [2] Update the client scripts (from HikariKnight)\n\n";
+	}
+	
+	# Complete the message
+	print "Enter the number for your choice:";
+	
+	# Get user input
+	my $answer = <STDIN>;
+	
+	# If user answered 2 then run the script updater and exit
+	if ($answer =~ /^2/ && $cwd !~ /\/opt\/runescape/)
+	{
+		# Execute script updater
+		runscriptupdater();
+		
+		# Tell user the update is done
+		print "\nDone running the update process!\nPress Enter/Return to exit:";
+		
+		# Wait for user to press enter
+		$exit = <STDIN>;
+		
+		# Exit script
+		exit;
+	}
+	
+	# Make updating folder
+	system "mkdir \"$clientdir/.updating\"";
+	
+	# Check if unzip is installed, otherwise compile it
+	checkfor_unzip();
+	
+	# Download and extract the jagexappletviewer from the official Windows client
+	updatefromwindowsclient();
+		
+	# Clean up based on operatingsystem Linux
+	system "cd \"$clientdir\" && rm -rf \"$clientdir/.updating/\"";
+	
+	# If the script is not located in a read only location for the user
+	if ($cwd !~ /^(\/usr\/s?bin|\/opt\/runescape|\/usr\/local\/s?bin)/)
+	{
+		# Ask user if we shall update the scripts too
+		print "\nDo you want to update the RuneScape UNIX Client scripts too?\n[y/n] (default = y):";
+		
+		# Get user input
+		my $updatescripts = <STDIN>;
+		
+		# If user said yes or choose the default
+		if ($updatescripts !~ /^(n|N)/)
+		{
+			# Execute script updater
+			runscriptupdater();
+		}
+	}
+	
+	# Tell user the update is done
+	print "\nDone running the update process!\nPress Enter/Return to exit:";
+	
+	# Wait for user to press enter
+	$exit = <STDIN>;
+	
+	# Exit the script
+	exit;
+}
+
+#
+#---------------------------------------- *** ----------------------------------------
+#
+
+# Read contents from a file and put it into a pointer
+sub ReadFile 
+{
+	# Gets passed data from the function call
+	my ($filename) = @_;
+
+	# Makes an array to keep the inputdata
+	my @inputdata;
+
+	# Opens the passed file, if error it dies with the message "Can't open filename"
+	open (my $FILE, "$filename") || die "Can not open $_!";
+
+	# Close the file
+	close($FILE);
+
+	# Return the pointer to the datafile inputdata
+	return(\@inputdata);
+}
+
+#
+#---------------------------------------- *** ----------------------------------------
+#
+
+sub runscriptupdater
+{
+	# Make a newline so the output looks nicer
+	print "\n";
+	
+	system "\"$cwd/update-scripts\"";
+}
+
+#
+#---------------------------------------- *** ----------------------------------------
+#
+
+sub get_unzip
+{
+	# Tell user that we did not find the 7z binary and offer to download and compile a local copy
+	print "I was unable to find the 7z binary!
+Please install the package unzip from [community] using Pacman
+if you want it to be installed across your system.
+For compability reasons this script can do so for you.
+
+Is it ok for me to try and install unzip from [community] ?
+Answer (default = y) [y/n]:";
+	# Get users reply for the question above
+	my $installunzip = <STDIN>;
+	
+	#If user said no then
+	if ($installunzip =~ /(n|No)/i)
+	{
+		# Show user a final message and ask them to press ENTER/RETURN to exit
+		print "\nPlease use Pacman to install unzip\nso that you can update the client.\nPress ENTER/RETURN to exit:";
+		my $exit = <STDIN>;
+		exit;
+	}
+			
+	# Run the commands
+	system "pacman -S unzip"		
+}
+
+#
+#---------------------------------------- *** ----------------------------------------
+#
+
+sub updatefromwindowsclient
+{
+	# Download the Windows client
+	system "$fetchcommand \"$clientdir/.updating/runescape.msi\" $windowsurl";
+	
+	# If we are on anything but Windows
+	if ($OS !~ /MSWin32/)#/(darwin|freebsd|netbsd|openbsd|solaris|linux)/)
+	{
+		# Prepare the directory for unzip (it requires the library to be
+		# in the same directory we are in unless i make a wrapper
+		# (but the .updating folder is getting removed anyway once we are done)
+		system "cd \"$clientdir/.updating/\" && ln -s \"$clientdir/7-zip/$OS/\$(uname -p)/\"* ./";
+		
+		# Check if we can extract the jagexappletviewer.jar directly
+		my $jarfile = `export PATH=\$PATH:$clientdir/modules/7-zip/$OS/\$(uname -p)/ && cd \"$clientdir/.updating/\" && $zipbin l runescape.msi | grep "JagexAppletViewerJarFile*" | cut -c54-1000`;
+		# Remove newlines
+		$jarfile =~ s/(\n|\r|\r\n)//g;
+		
+		# If we did not get the jagexappletviewer.jar listed then
+		if ($jarfile !~ /JagexAppletViewerJarFile*/)
+		{
+			# Extract rslauncher.cab from runescape.msi
+			system "export PATH=\$PATH:$clientdir/modules/7-zip/$OS/\$(uname -p)/ && cd \"$clientdir/.updating/\" && sleep 3 && $zipbin e runescape.msi rslauncher.cab ";
+		
+			# Find the name of the jar file
+			$jarfile = `export PATH=\$PATH:$clientdir/modules/7-zip/$OS/\$(uname -p)/ && cd \"$clientdir/.updating/\" && $zipbin l rslauncher.cab | grep "JagexAppletViewerJarFile*" | cut -c54-1000`;
+			# Remove newlines
+			$jarfile =~ s/(\n|\r|\r\n)//g;
+		
+			# Extract jagexappletviewer.jar and move it into place
+			system "export PATH=\$PATH:$clientdir/modules/7-zip/$OS/\$(uname -p)/ && cd \"$clientdir/.updating/\" && $zipbin e rslauncher.cab $jarfile && cp -v \"$clientdir/.updating/$jarfile\" \"$clientdir/bin/jagexappletviewer.jar\"";
+		}
+		# Else just extract the file directly
+		else
+		{
+			# Extract jagexappletviewer.jar and move it into place
+			system "export PATH=\$PATH:$clientdir/modules/7-zip/$OS/\$(uname -p)/ && cd \"$clientdir/.updating/\" && $zipbin e runescape.msi $jarfile";
+			system "cp -v \"$clientdir/.updating/$jarfile\" \"$clientdir/bin/jagexappletviewer.jar\"";
+		}
+	}
+}
+
+#
+#---------------------------------------- *** ----------------------------------------
+#
+
+sub checkfor_unzip
+{
+	# Test for system installed 7zip
+	my $test7zsys = `7z`;
+	
+	# If we do not have 7zip, check if we have a compiled version from earlier
+	if ($test7zsys !~ /7-Zip/)
+	{
+		# Tell user that the warning is bogus
+		print "The warning above this line is just bogus so ignore it.\n\n";
+		
+		# Set a new testpath
+		my $test7z = `export PATH=\$PATH:$clientdir/modules/7-zip/$OS/\$(uname -p)/ && 7z`;
+		
+		# If we do not have 7zip at all
+		if ($test7z !~ /7-Zip/)
+		{
+			# Install unzip from source
+			get_unzip();
+		}
+	}
+}
+
+#
+#---------------------------------------- *** ----------------------------------------
+#
+
