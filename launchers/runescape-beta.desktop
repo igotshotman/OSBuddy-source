@@ -14,6 +14,6 @@ Name[en_US]=runescape-beta.conf
 
 [UpdateClient Shortcut Group]
 Name=Update Runescape Client
-Exec=xterm -e "/opt/runescape/update-runescape-client"
+Exec=urxvt -e "/opt/runescape/update-runescape-client"
 #TargetEnvironment=Unity
 

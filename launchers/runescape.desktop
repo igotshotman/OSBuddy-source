@@ -13,7 +13,7 @@ X-Ayatana-Desktop-Shortcuts=LaunchBeta;UpdateClient;
 
 [UpdateClient Shortcut Group]
 Name=Update Runescape Client
-Exec=xterm -e "update-runescape-client"
+Exec=urxvt -e "update-runescape-client"
 #TargetEnvironment=Unity
 
 [LaunchBeta Shortcut Group]
