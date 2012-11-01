@@ -7,7 +7,7 @@
 # limited functionality. I wrote this perl script in an attempt to port 
 # the RuneScape client to linux and all other unix systems capable of 
 # running java, the script also implement language settings support and 
-# can be updated by replacing the bin/jagexappletviewer.jar and share/runescape.prm
+# can be updated by replacing the bin/jagexappletviewer.jar and settings/runescape.prm
 # with the ones found in the Windows client.
 
 # This script is free to use and redistribute(as long credits are kept)
@@ -86,7 +86,7 @@ VERBOSE MODES (warning!: outputs alot of text):
 }
 
 # If this script have been installed systemwide
-if ($rsu_data->cwd =~ /^(\/usr\/s?bin|\/opt\/runescape|\/usr\/local\/s?bin)/)
+if ($rsu_data->cwd =~ /^(\/usr\/s?bin|\/opt\/runescape|\/usr\/local\/s?bin|\/usr\/share)/)
 {
 	# Print debug info
 	print "The script is running from a system path!\n".$rsu_data->HOME."/.config/runescape will be used as client folder instead!\n\n";
@@ -95,10 +95,10 @@ if ($rsu_data->cwd =~ /^(\/usr\/s?bin|\/opt\/runescape|\/usr\/local\/s?bin)/)
 	$rsu_data->clientdir = $rsu_data->HOME."/.config/runescape/";
 		
 	# Make the client folders
-	system "mkdir -p \"".$rsu_data->HOME."/.config/runescape/bin\" && mkdir -p \"".$rsu_data->HOME."/.config/runescape/share\"";
+	system "mkdir -p \"".$rsu_data->HOME."/.config/runescape/bin\" && mkdir -p \"".$rsu_data->HOME."/.config/runescape/settings\"";
 		
 	# Symlink or Copy needed resources to the clientdir
-	system "cp -v \"".$rsu_data->cwd."/share/settings.conf.example\" \"".$rsu_data->clientdir."/share/settings.conf.example\" && cp -v \"".$rsu_data->cwd."/share/runescape.prm.example\" \"".$rsu_data->clientdir."/share/runescape.prm.example\" && cp -v \"".$rsu_data->cwd."/share/runescape-beta.prm\" \"".$rsu_data->clientdir."/share/runescape-beta.prm\"";
+	system "cp -v \"".$rsu_data->cwd."/settings/settings.conf\" \"".$rsu_data->clientdir."/settings/settings.conf\" && cp -v \"".$rsu_data->cwd."/settings/runescape.prm.example\" \"".$rsu_data->clientdir."/settings/runescape.prm.example\" && cp -v \"".$rsu_data->cwd."/settings/runescape-beta.prm\" \"".$rsu_data->clientdir."/settings/runescape-beta.prm\"";
 	
 	# Make a variable to contain the clientdir so we can use it in a command
 	my $clientdir = $rsu_data->clientdir;
@@ -106,11 +106,11 @@ if ($rsu_data->cwd =~ /^(\/usr\/s?bin|\/opt\/runescape|\/usr\/local\/s?bin)/)
 	# Check if runescape.prm exists
 	my $prmfile_exists = `ls -la $clientdir/share|grep -P \"runescape.prm\$\"`;
 		
-	# If runescape.prm do not exist
+	# If runescape.prm does not exist
 	if ($prmfile_exists !~ /runescape.prm/)
 	{
 		# Copy the example file to clientdir as runescape.prm
-		system "cp -v \"".$rsu_data->cwd."/share/runescape.prm.example\" \"".$rsu_data->clientdir."/share/runescape.prm\"";
+		system "cp -v \"".$rsu_data->cwd."/settings/runescape.prm.example\" \"".$rsu_data->clientdir."/settings/runescape.prm\"";
 	}
 		
 }
@@ -130,11 +130,11 @@ rsu_cfjav::check_for_jagexappletviewer($rsu_data);
 
 	
 # Print debug info
-print "Trying to read ".$rsu_data->clientdir."/share/settings.conf\n";
+print "Trying to read ".$rsu_data->clientdir."/settings/settings.conf\n";
 
 ########################################################################
 #        BELOW THIS LINE ARE SOME SETTINGS YOU CAN CHANGE              #
-#       PLEASE CHANGE THEM IN THE share/settings.conf FILE             #
+#       PLEASE CHANGE THEM IN THE settings/settings.conf FILE          #
 ########################################################################
 
 # Read the preferred java in the config file, if nothing is found then use default-java
@@ -147,7 +147,7 @@ $rsu_data->forcealsa = parseargs("forcealsa", "0");
 # Check if a prmfile setting is active
 $rsu_data->prmfile = parseargs("prmfile", "runescape.prm");
 
-# Define fallbackprms incase we cannot read share/runescape.prm
+# Define fallbackprms incase we cannot read settings/runescape.prm
 $rsu_data->fallbackprms = "jagexappletviewer.jar -Dsun.java2d.noddraw=true -Dcom.jagex.config=http://www.runescape.com/k=3/l=\$(Language:0)/jav_config.ws -Xss2m -Xmx512m -XX:CompileThreshold=1500 -Xincgc -XX:+UseConcMarkSweepGC -XX:+UseParNewGC jagexappletviewer ";
 
 ########################################################################

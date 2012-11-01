@@ -56,7 +56,7 @@ package rsu_IO;
 		my ($key, $default, $rsu_data) = @_;
 		
 		# Get the content from the settings file
-		my $confcontent = ReadFile($rsu_data->clientdir."/share/settings.conf");
+		my $confcontent = ReadFile($rsu_data->clientdir."/settings/settings.conf");
 		
 		# If no file is found or error reading the file
 		if ($confcontent =~ /error reading file/)
@@ -101,7 +101,7 @@ package rsu_IO;
 		if ($value eq '')
 		{
 			# Print debug info
-			print "Did not find $key in ".$rsu_data->clientdir."/share/settings.conf\n";
+			print "Did not find $key in ".$rsu_data->clientdir."/settings/settings.conf\n";
 			
 			# Set value to default
 			$value = $default;

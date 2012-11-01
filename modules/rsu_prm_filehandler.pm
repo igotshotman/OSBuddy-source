@@ -9,16 +9,16 @@ package rsu_prm;
 		my $rsu_data = shift;
 		
 		# Print debug info
-		print "Reading .prm file ".$rsu_data->clientdir."/share/".$rsu_data->prmfile."\n";
+		print "Reading .prm file ".$rsu_data->clientdir."/settings/".$rsu_data->prmfile."\n";
 		
 		# Read the RuneScape parameters file and send pointer to $prms
-		my $prms = rsu_IO::ReadFile($rsu_data->clientdir."/share/".$rsu_data->prmfile."");
+		my $prms = rsu_IO::ReadFile($rsu_data->clientdir."/settings/".$rsu_data->prmfile."");
 		
 		# If there is an error reading the file
 		if ($prms =~ /error reading file/)
 		{
 			# Print debug info
-			print "Error opening ".$rsu_data->clientdir."/share/".$rsu_data->prmfile."\nI will instead use these fallback parameters:\n".$rsu_data->fallbackprms."\n";
+			print "Error opening ".$rsu_data->clientdir."/settings/".$rsu_data->prmfile."\nI will instead use these fallback parameters:\n".$rsu_data->fallbackprms."\n";
 			
 			# Use the fallback prms defined at the top of the script
 			$prms = $rsu_data->fallbackprms;

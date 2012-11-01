@@ -195,19 +195,19 @@ package rsu_java;
 It looks like your default Java is not a binary file!
 This script requires direct use of the Java BINARY file
 in order to make sure all the Java library files gets loaded properly.
-Please edit $cwd/share/settings.conf
+Please edit $cwd/settings/settings.conf
 and add the path to the Java BINARY as the value for preferredjava.
 
 You can use the command (You can find this text inside /tmp/java_notice.txt):
 sudo find / -name "libjli.so" | sed "s/\\/lib\\/\\(i386\\|amd64\\)\\/jli\\/libjli.so/\\/bin\\/java/g"
 
 In order to get a list of possible paths you can use as the preferredjava value.
-Also please look at $cwd/share/settings.conf.example
+Also please look at $cwd/settings/settings.conf.example
 for examples on the setting values.
 
 Please press ENTER/RETURN to continue running the script 
 after you added the path to the binary into the 
-$cwd/share/settings.conf file.
+$cwd/settings/settings.conf file.
 
 java_not_binary_message
 		
@@ -251,7 +251,7 @@ java_not_binary_message
 		if ($newjavapath =~ /JAVA NOT SET/)
 		{
 			# Tell user whats wrong and then exit
-			print "You did not set the path to Java in the preferredjava setting\ninside ".$rsu_data->cwd."/share/settings.conf\nThe client will not work for you without this setting... EXITING!\n";
+			print "You did not set the path to Java in the preferredjava setting\ninside ".$rsu_data->cwd."/settings/settings.conf\nThe client will not work for you without this setting... EXITING!\n";
 			exit
 		}
 		

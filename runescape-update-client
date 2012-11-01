@@ -60,7 +60,7 @@ my $exit;
 if (-t STDOUT)
 {	
 	# If this script have been installed systemwide
-	if ($cwd =~ /^(\/usr\/s?bin|\/opt\/runescape|\/usr\/local\/s?bin)/)
+	if ($cwd =~ /^(\/usr\/s?bin|\/opt\/runescape|\/usr\/local\/s?bin|\/usr\/share)/)
 	{
 		# change $cwd to the system installation location
 		$cwd = "/usr/share/runescape";
@@ -94,8 +94,8 @@ sub main
 	# Get user input
 	my $answer = <STDIN>;
 	
-	# If user answered y then run the script updater and exit
-	if ($answer =~ /^y/ && $cwd !~ /\/opt\/runescape/)
+	# If user answered y then run the client update script and exit
+	if ($answer =~ /y/ && $cwd !~ /\/opt\/runescape/)
 	{
 		# Make updating folder
 		system "mkdir \"$clientdir/.updating\"";
@@ -107,7 +107,7 @@ sub main
 		updatefromwindowsclient();
 		
 		# Clean up based on Operating System Linux
-		#system "cd \"$clientdir\" && rm -rf \"$clientdir/.updating/\"";
+		system "cd \"$clientdir\" && rm -rf \"$clientdir/.updating/\"";
 	
 		# Tell user the update is done
 		print "\nDone running the update process!\nPress Enter/Return to exit.";
@@ -118,7 +118,7 @@ sub main
 		# Exit the script
 		exit;
 	}
-	else
+	elsif ($answer =~ /n/)
 	{ 
 		# Exit the script
 		exit;
