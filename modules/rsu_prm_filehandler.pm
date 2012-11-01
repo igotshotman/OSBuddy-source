@@ -30,7 +30,7 @@ package rsu_prm;
 			$prms = "@$prms";
 			
 			# Print debug info
-			print "This is the info I gathered from the ".$rsu_data->prmfile." file\n######## File Start ########\n$prms\n######## File End ########\n\n";
+			print "This is the info I gathered from the ".$rsu_data->prmfile." file:\n######## File Start ########\n$prms\n######## File End ########\n\n";
 		}
 		
 		# Print debug info

@@ -7,7 +7,7 @@ package rsu_verbose;
 		my $rsu_data = shift;
 		
 		# Tell user what we are going to do
-		print "Checking if any --verbose parameters were passed to the script\n";
+		print "Checking if any --verbose parameters were passed to the script.\n";
 		
 		# If --verbose was passed to the script
 		if ($rsu_data->args =~ /--verbose($|\ )/g)
