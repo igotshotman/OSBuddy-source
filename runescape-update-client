@@ -118,6 +118,11 @@ sub main
 		# Exit the script
 		exit;
 	}
+	else
+	{ 
+		# Exit the script
+		exit;
+	}
 }
 
 #
