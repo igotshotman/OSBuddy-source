@@ -60,13 +60,18 @@ my $HOME = $rsu_data->HOME;
 if ($rsu_data->args =~ /--help/)
 {
 	# Display the help text
-	print "Run the \"runescape\" without any parameters to launch the client normally.
+	print "Run the \"runescape\" script without any parameters to launch the client normally.
 There are however some parameters you can use to alter
 the behaviour of the script.
-	
-VERBOSE MODES (warning!: outputs alot of text):
+
+CHANGE PRM:
+   You can change the runescape.prm file when running the runescape script.
+   For example, to launch the runescape-beta.prm file without changing your settings permanently:
+	  runescape --prmfile=runescape-beta.prm
+
+VERBOSE MODES (warning: outputs a lot of text):
    Make java display full verbose output: 
-     runescape --verbose
+      runescape --verbose
 	
    Make java display selected verbose outputs (jni, gc and class verbose)
       runescape --verbose:jni
