@@ -48,8 +48,6 @@ $rsu_data->args = "@ARGV";
 # Detect the current OS and add it to the data container
 $rsu_data->OS = "$^O";
 
-checkforcleanup();
-
 # Get the environment variable for USERPROFILE
 $rsu_data->HOME = $ENV{"HOME"};
 
@@ -209,23 +207,6 @@ sub parseargs
 		
 		# Return setting
 		return $result;
-	}
-}
-
-#
-#---------------------------------------- *** ----------------------------------------
-#
-
-sub checkforcleanup
-{
-	# Get directory listing
-	my $checkforscript = `ls \"$cwd\"`;
-		
-	# If cleanupscript.pl is present
-	if ($checkforscript =~ /cleanupscript.pl/)
-	{
-		# Run the cleanupscript then delete it
-		system "perl \"".$rsu_data->cwd."/cleanupscript.pl\" && rm \"".$rsu_data->cwd."/cleanupscript.pl\"";
 	}
 }
 

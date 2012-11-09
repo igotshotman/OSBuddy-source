@@ -174,7 +174,7 @@ sub updatefromwindowsclient
 	system "$fetchcommand \"$clientdir/.updating/runescape.msi\" $windowsurl";
 	
 	# Prepare the directory for p7zip (it requires the library to be
-	# in the same directory we are in unless i make a wrapper
+	# in the same directory we are in unless I make a wrapper
 	# (but the .updating folder is getting removed anyway once we are done)
 	system "cd \"$clientdir/.updating/\" && ln -s \"$clientdir/7-zip/$OS/\$(uname -p)/\"* ./";
 		
