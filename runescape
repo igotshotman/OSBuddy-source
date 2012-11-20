@@ -100,7 +100,7 @@ if ($rsu_data->cwd =~ /^(\/usr\/s?bin|\/opt\/runescape|\/usr\/local\/s?bin|\/usr
 	system "mkdir -p \"".$rsu_data->HOME."/.config/runescape/bin\" && mkdir -p \"".$rsu_data->HOME."/.config/runescape/settings\"";
 		
 	# Symlink or Copy needed resources to the clientdir
-	system "cp -v \"".$rsu_data->cwd."/settings/settings.conf\" \"".$rsu_data->clientdir."/settings/settings.conf\" && cp -v \"".$rsu_data->cwd."/settings/runescape.prm.example\" \"".$rsu_data->clientdir."/settings/runescape.prm.example\";
+	system "cp -v \"".$rsu_data->cwd."/settings/settings.conf\" \"".$rsu_data->clientdir."/settings/settings.conf\" && cp -v \"".$rsu_data->cwd."/settings/runescape.prm.example\" \"".$rsu_data->clientdir."/settings/runescape.prm.example\"";
 	
 	# Make a variable to contain the clientdir so we can use it in a command
 	my $clientdir = $rsu_data->clientdir;
