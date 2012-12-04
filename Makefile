@@ -1,5 +1,7 @@
 install:
 	mkdir -p $(DESTDIR)/opt/runescape/
+	mkdir -p $(DESTDIR)/usr/share/applications/
+	mkdir -p $(DESTDIR)/usr/share/icons/scalable/
 
 	install -m 0755 runescape $(DESTDIR)/opt/runescape/
 	install -m 0755 runescape-update-client $(DESTDIR)/opt/runescape/
