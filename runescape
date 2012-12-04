@@ -106,13 +106,13 @@ if ($rsu_data->cwd =~ /^(\/usr\/s?bin|\/opt\/runescape|\/usr\/local\/s?bin|\/usr
 	my $clientdir = $rsu_data->clientdir;
 	
 	# Check if runescape.prm exists
-	my $prmfile_exists = `ls -la $clientdir/share|grep -P \"runescape.prm\$\"`;
+	my $prmfile_exists = `ls -la $clientdir/settings|grep -P \"runescape.prm\$\"`;
 		
 	# If runescape.prm does not exist
 	if ($prmfile_exists !~ /runescape.prm/)
 	{
 		# Copy the example file to clientdir as runescape.prm
-		system "cp -v \"".$rsu_data->cwd."/settings/runescape.prm.example\" \"".$rsu_data->clientdir."/settings/runescape.prm\"";
+		system "cp -v \"".$rsu_data->cwd."/settings/runescape.prm\" \"".$rsu_data->clientdir."/settings/runescape.prm\"";
 	}
 		
 }
