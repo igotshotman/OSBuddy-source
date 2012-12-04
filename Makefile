@@ -1,5 +1,6 @@
 install:
-	mkdir -p $(DESTDIR)/opt/runescape/
+	mkdir -p $(DESTDIR)/opt/runescape/modules/
+	mkdir -p $(DESTDIR)/opt/runescape/settings/
 	mkdir -p $(DESTDIR)/usr/share/applications/
 	mkdir -p $(DESTDIR)/usr/share/icons/hicolor/scalable/apps/
 
