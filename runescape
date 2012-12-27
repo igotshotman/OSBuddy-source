@@ -93,20 +93,27 @@ if ($rsu_data->cwd =~ /^(\/usr\/s?bin|\/opt\/runescape|\/usr\/local\/s?bin|\/usr
 	# Print debug info
 	print "The script is running from a system path!\n".$rsu_data->HOME."/.config/runescape will be used as client folder instead!\n\n";
 		
+	# Make a variable to contain the clientdir so we can use it in a command
+	my $clientdir = $rsu_data->clientdir;
+	
 	# Change clientdir to ~/.config/runescape
 	$rsu_data->clientdir = $rsu_data->HOME."/.config/runescape/";
 		
 	# Make the client folders
 	system "mkdir -p \"".$rsu_data->HOME."/.config/runescape/bin\" && mkdir -p \"".$rsu_data->HOME."/.config/runescape/settings\"";
-		
-	# Symlink or Copy needed resources to the clientdir
-	system "cp -v \"".$rsu_data->cwd."/settings/settings.conf\" \"".$rsu_data->clientdir."/settings/settings.conf\" && cp -v \"".$rsu_data->cwd."/settings/runescape.prm\" \"".$rsu_data->clientdir."/settings/runescape.prm\"";
-	
-	# Make a variable to contain the clientdir so we can use it in a command
-	my $clientdir = $rsu_data->clientdir;
-	
+
+	# Check if settings.conf exists
+	my $settings_exists = `ls $clientdir/settings|grep \"settings.conf\$\"`;
+
+	# If settings.conf does not exist
+	if ($settings_exists !~ /settings.conf/)
+	{
+		# Copy the example file to clientdir as settings.conf
+		system "cp -v \"".$rsu_data->cwd."/settings/settings.conf\" \"".$rsu_data->clientdir."/settings/settings.conf\"";
+	}
+
 	# Check if runescape.prm exists
-	my $prmfile_exists = `ls -la $clientdir/settings|grep -P \"runescape.prm\$\"`;
+	my $prmfile_exists = `ls $clientdir/settings|grep \"runescape.prm\$\"`;
 		
 	# If runescape.prm does not exist
 	if ($prmfile_exists !~ /runescape.prm/)
