@@ -4,15 +4,19 @@
 # as it fit you within the rules of RuneScape, it is based on 
 # Ethoxyethaan's forum post on RuneScape showing how to use the files 
 # from the Windows client to run it through the command line but with 
-# limited functionality. I wrote this perl script in an attempt to port 
-# the RuneScape client to linux and all other unix systems capable of 
-# running java, the script also implement language settings support and 
+# limited functionality. HikariKnight wrote this perl script in an attempt to port 
+# the RuneScape client to Linux. The script also implements language settings support and 
 # can be updated by replacing the bin/jagexappletviewer.jar and settings/runescape.prm
 # with the ones found in the Windows client.
 
-# This script is free to use and redistribute(as long credits are kept)
-# If you like this script you may want to check out my other projects at
+# This script is free to use and redistribute (as long credits are kept)
+# If you like this script you may want to check out HikariKnight's other projects at
 # http://hkprojects.weebly.com
+
+# This version of the script is edited by Unia. I removed all the OSX/Windows and other Unixes
+# support and removed things I wouldn't use myself. I basically made this one for myself, but I
+# share it with you in case someone might find it interesting. It could be used on other computers,
+# perhaps with some adaptions, or as a base for your own client.
 
 my $scriptversion = "3.9.2";
 
@@ -21,6 +25,7 @@ print "RuneScape Unix Client script version $scriptversion\n\n";
 
 # Use FindBin module to get script directory
 use FindBin;
+
 # Get script directory
 my $cwd = $FindBin::RealBin;
 
@@ -34,7 +39,7 @@ my $rsu_data = {};
 bless $rsu_data;
 
 # Create mutators and add them to the variable
-$rsu_data->create_mutator(qw(version OS cwd clientdir javabin javaversion HOME args verboseprms preferredjava forcealsa prmfile fallbackprms));
+$rsu_data->create_mutator(qw(version OS cwd clientdir javabin javaversion HOME args verboseprms preferredjava forcepulseaudio forcealsa prmfile fallbackprms));
 
 # Add clientdir data to the data container
 $rsu_data->clientdir = $cwd;
@@ -58,26 +63,24 @@ my $HOME = $rsu_data->HOME;
 if ($rsu_data->args =~ /--help/)
 {
 	# Display the help text
-	print "Run the \"runescape\" script without any parameters to launch the client normally.
-There are however some parameters you can use to alter
-the behaviour of the script.
+	print "Usage: runescape [argument1] [argument2] ...
 
-CHANGE PRM:
-   You can change the runescape.prm file when running the runescape script:
-	  runescape --prmfile=/path/to/prm.prm
+Run the \"runescape\" script without any parameters to launch the client normally
 
-VERBOSE MODES (warning: outputs a lot of text):
-   Make java display full verbose output: 
-      runescape --verbose
-	
-   Make java display selected verbose outputs (jni, gc and class verbose)
-      runescape --verbose:jni
-      runescape --verbose:gc
-      runescape --verbose:class
+Arguments:
+   --prmfile=/path/to/prm.prm
+          This changes the runescape.prm file used to run with the script
+   --verbose
+          Make Java display full verbose output (warning: outputs a lot of text)
+   --verbose:jni
+          Make Java display selected verbose output
+   --verbose:gc
+          Make Java display selected verbose output
+   --verbose:class
+          Make Java display selected verbose output
    
-   All 3 of the above verbose modes can be used together like this.
-      runescape --verbose:gc --verbose:jni
-		
+   All 3 of the above verbose modes can be used together by listing them all.		
+
    Save verbose output to a file:
    Simply add \"&> \$HOME/verbose.txt\" at the end of the command like this.
       runescape --verbose &> \$HOME/verbose.txt
@@ -88,10 +91,10 @@ VERBOSE MODES (warning: outputs a lot of text):
 }
 
 # If this script have been installed systemwide
-if ($rsu_data->cwd =~ /^(\/usr\/s?bin|\/opt\/runescape|\/usr\/local\/s?bin|\/usr\/share)/)
+if ($rsu_data->cwd =~ /^(\/opt\/runescape)/)
 {
 	# Print debug info
-	print "The script is running from a system path!\n".$rsu_data->HOME."/.config/runescape will be used as client folder instead!\n\n";
+	print "The script is running from a system path!\n".$rsu_data->HOME."/.config/runescape will be used as client folder!\n\n";
 		
 	# Make a variable to contain the clientdir so we can use it in a command
 	my $clientdir = $rsu_data->clientdir;
@@ -100,10 +103,17 @@ if ($rsu_data->cwd =~ /^(\/usr\/s?bin|\/opt\/runescape|\/usr\/local\/s?bin|\/usr
 	$rsu_data->clientdir = $rsu_data->HOME."/.config/runescape/";
 		
 	# Make the client folders
-	system "mkdir -p \"".$rsu_data->HOME."/.config/runescape/bin\" && mkdir -p \"".$rsu_data->HOME."/.config/runescape/settings\"";
+	unless (-d \"".$rsu_data->HOME."/.config/runescape/bin\"")
+	{
+		system("mkdir -p \"".$rsu_data->HOME."/.config/runescape/bin\"");
+	}
+	unless (-d \"".$rsu_data->HOME."/.config/runescape/settings\"")
+	{
+		system("mkdir -p \"".$rsu_data->HOME."/.config/runescape/settings\"");
+	}
 
 	# Check if settings.conf exists
-	my $settings_exists = `ls $clientdir/settings|grep \"settings.conf\$\"`;
+	my $settings_exists = `ls $clientdir/settings | grep \"settings.conf\$\"`;
 
 	# If settings.conf does not exist
 	if ($settings_exists !~ /settings.conf/)
@@ -113,7 +123,7 @@ if ($rsu_data->cwd =~ /^(\/usr\/s?bin|\/opt\/runescape|\/usr\/local\/s?bin|\/usr
 	}
 
 	# Check if runescape.prm exists
-	my $prmfile_exists = `ls $clientdir/settings|grep \"runescape.prm\$\"`;
+	my $prmfile_exists = `ls $clientdir/settings | grep \"runescape.prm\$\"`;
 		
 	# If runescape.prm does not exist
 	if ($prmfile_exists !~ /runescape.prm/)
@@ -123,21 +133,11 @@ if ($rsu_data->cwd =~ /^(\/usr\/s?bin|\/opt\/runescape|\/usr\/local\/s?bin|\/usr
 	}
 		
 }
-# Else if script is installed locally
-elsif($rsu_data->cwd =~ /$HOME\/.local\/bin/)
-{
-	# Print debug info
-	print "We are running from ".$rsu_data->cwd.", however the client\nshould be at \\\$HOME/.local/share/runescape\nchanging directory to \\\$HOME/.local/share/runescape\n\n";
-		
-	# change cwd to the local installation location
-	$cwd = $rsu_data->HOME."/.local/opt/runescape";
-}
 
 # Due to legal reasons the file jagexappletviewer.jar is no longer included by default so we need to check if it exists
 # If jagexappletviewer.jar do not exist inside the $rsu_data->cwd/bin folder then
 rsu_cfjav::check_for_jagexappletviewer($rsu_data);
 
-	
 # Print debug info
 print "Trying to read ".$rsu_data->clientdir."/settings/settings.conf\n";
 
@@ -148,6 +148,10 @@ print "Trying to read ".$rsu_data->clientdir."/settings/settings.conf\n";
 
 # Read the preferred java in the config file, if nothing is found then use default-java
 $rsu_data->preferredjava = parseargs("preferredjava", "default-java");
+
+# Read from the config file or passed parameters if the user want to force the client to use pulseaudio
+# If nothing then dont use it (incase a system does not have pulseaudio/padsp installed)
+$rsu_data->forcepulseaudio = parseargs("forcepulseaudio", "0");
 
 # Read from the config file or passed parameters if the user want to tell java to use alsa in the base for sounds
 # If nothing is found then do not use alsa and instead use the java default
@@ -163,7 +167,7 @@ $rsu_data->fallbackprms = "jagexappletviewer.jar -Dsun.java2d.noddraw=true -Dcom
 #DO NOT EDIT THE CODE BELOW THIS LINE UNLESS YOU KNOW WHAT YOU ARE DOING!
 ########################################################################
 
-# Make debug info look abit nicer
+# Make debug info look a bit nicer
 print "\n";
 
 # Check if any --verbose parameters were passed to the script
@@ -175,14 +179,8 @@ print "\n";
 # Be strict to avoid messy code
 use strict;
 
-# Start actual process of running the client
-
-# Run the main function for unix
+# Start actual process of running the client: run the main function for unix
 rsu_mains::unix_main($rsu_data);
-
-#
-#---------------------------------------- *** ----------------------------------------
-#
 
 sub parseargs
 {
@@ -216,10 +214,6 @@ sub parseargs
 	}
 }
 
-#
-#---------------------------------------- *** ----------------------------------------
-#
-
 # Create mutator function from "Programming Perl"
 sub create_mutator
 {
@@ -240,9 +234,5 @@ sub create_mutator
 		};
 	}
 }
-
-#
-#---------------------------------------- *** ----------------------------------------
-#
 
 __END__
