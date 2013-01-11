@@ -20,10 +20,6 @@ unless (-d "$clientdir/bin")
 {
 	system("mkdir -p \"$clientdir/bin\"");
 }
-unless (-d "$clientdir/share")
-{
-	system("mkdir -p \"$clientdir/share\"");
-}
 
 # Run the script
 main();
