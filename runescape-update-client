@@ -25,45 +25,27 @@ my $HOME;
 
 # Check if we are root
 $isroot = `whoami`;
-	
+
 # Get users homefolder
 $HOME = $ENV{"HOME"};
 
 # Make variable to contain the p7zip binary name
 my $zipbin = "7z";
-	
+
 # Command to fetch the official Windows client
 my $fetchcommand = "wget -O";
 
 # Define the variable to wait for the user to press Enter to exit
 my $exit;
-			
-# Check if updates require root permissions but we don't have it
-#if ($cwd =~ /^(\/opt*|\/usr\/s?bin*|\/bin*)/ && $isroot !~ /root/)
-#{
-#	# If we are inside an interactive shell then
-#	if (-t STDOUT)
-#	{
-#		# Run script as root
-#		system ("sudo perl \"$cwd/update-runescape-client\"");
-#	}
-#	else
-#	{
-#		# Run script in urxvt so we can get input from user and with the right permissions
-#		system ("urxvt -e \"echo The client is in a location that requires && echo superuser permissions to change && sudo perl \\\"$cwd/update-runescape-client\\\"\"");
-#	}
-#	# Exit once we are done
-#	exit
-#}
 
 # If we are inside an interactive shell then
 if (-t STDOUT)
-{	
+{
 	# If this script have been installed systemwide
-	if ($cwd =~ /^(\/usr\/s?bin|\/opt\/runescape|\/usr\/local\/s?bin|\/usr\/share)/)
+	if ($cwd =~ /^(\/opt\/runescape/)
 	{
 		# change $cwd to the system installation location
-		$cwd = "/usr/share/runescape";
+		$cwd = "/opt/runescape";
 		
 		# change $clientdir to ~/.config/runescape
 		$clientdir = "$HOME/.config/runescape/";
@@ -84,37 +66,37 @@ sub main
 {
 	# Show user a notice about jagexappletviewer.jar
 	print "Due to legal reasons the file jagexappletviewer.jar is not \navailable/downloadable in certain countries. For this script \nto work you must be able to download the official RuneScape \nclient for extraction!\n\n";
-	
+
 	# Ask if user is sure
 	print "Are you sure you want to update jagexappletviewer.jar\n(from Jagex) by using the official Windows client?\n\n";
-	
+
 	# Complete the message
 	print "Enter (default = y) [y/n]: ";
-	
+
 	# Get user input
 	my $answer = <STDIN>;
-	
+
 	# If user answered y then run the client update script and exit
 	if ($answer =~ /y/ && $cwd !~ /\/opt\/runescape/)
 	{
 		# Make updating folder
 		system "mkdir \"$clientdir/.updating\"";
-	
+
 		# Check if p7zip is installed, otherwise compile it
 		checkfor_p7zip();
-	
+
 		# Download and extract the jagexappletviewer from the official Windows client
 		updatefromwindowsclient();
-		
+
 		# Clean up based on Operating System Linux
 		system "cd \"$clientdir\" && rm -rf \"$clientdir/.updating/\"";
-	
+
 		# Tell user the update is done
 		print "\nDone running the update process!\nPress Enter/Return to exit.";
-	
+
 		# Wait for user to press enter
 		$exit = <STDIN>;
-	
+
 		# Exit the script
 		exit;
 	}
@@ -124,10 +106,6 @@ sub main
 		exit;
 	}
 }
-
-#
-#---------------------------------------- *** ----------------------------------------
-#
 
 sub get_p7zip
 {
@@ -140,7 +118,7 @@ Is it ok for me to try and install p7zip from [community] ?
 Answer (default = y) [y/n]: ";
 	# Get users reply for the question above
 	my $installp7zip = <STDIN>;
-	
+
 	#If user said no then
 	if ($installp7zip =~ /(n|No)/i)
 	{
@@ -148,7 +126,7 @@ Answer (default = y) [y/n]: ";
 		print "\nPlease use Pacman to install p7zip\nso that you can update the client.\n";
 		exit;
 	}
-			
+
 	# Run the commands
 	# Check if we are root, else use sudo
 	if ($isroot =~ /root/)
@@ -164,36 +142,32 @@ Answer (default = y) [y/n]: ";
 	}
 }
 
-#
-#---------------------------------------- *** ----------------------------------------
-#
-
 sub updatefromwindowsclient
 {
 	# Download the Windows client
 	system "$fetchcommand \"$clientdir/.updating/runescape.msi\" $windowsurl";
-	
+
 	# Prepare the directory for p7zip (it requires the library to be
 	# in the same directory we are in unless I make a wrapper
 	# (but the .updating folder is getting removed anyway once we are done)
 	system "cd \"$clientdir/.updating/\" && ln -s \"$clientdir/7-zip/$OS/\$(uname -p)/\"* ./";
-		
+
 	# Check if we can extract the jagexappletviewer.jar directly
 	my $jarfile = `export PATH=\$PATH:$clientdir/modules/7-zip/$OS/\$(uname -p)/ && cd \"$clientdir/.updating/\" && $zipbin l runescape.msi | grep "JagexAppletViewerJarFile*" | cut -c54-1000`;
 	# Remove newlines
 	$jarfile =~ s/(\n|\r|\r\n)//g;
-		
+
 	# If we did not get the jagexappletviewer.jar listed then
 	if ($jarfile !~ /JagexAppletViewerJarFile*/)
 	{
 		# Extract rslauncher.cab from runescape.msi
 		system "export PATH=\$PATH:$clientdir/modules/7-zip/$OS/\$(uname -p)/ && cd \"$clientdir/.updating/\" && sleep 3 && $zipbin e runescape.msi rslauncher.cab ";
-		
+
 		# Find the name of the jar file
 		$jarfile = `export PATH=\$PATH:$clientdir/modules/7-zip/$OS/\$(uname -p)/ && cd \"$clientdir/.updating/\" && $zipbin l rslauncher.cab | grep "JagexAppletViewerJarFile*" | cut -c54-1000`;
 		# Remove newlines
 		$jarfile =~ s/(\n|\r|\r\n)//g;
-		
+
 		# Extract jagexappletviewer.jar and move it into place
 		system "export PATH=\$PATH:$clientdir/modules/7-zip/$OS/\$(uname -p)/ && cd \"$clientdir/.updating/\" && $zipbin e rslauncher.cab $jarfile && cp -v \"$clientdir/.updating/$jarfile\" \"$clientdir/bin/jagexappletviewer.jar\"";
 	}
@@ -206,15 +180,11 @@ sub updatefromwindowsclient
 	}
 }
 
-#
-#---------------------------------------- *** ----------------------------------------
-#
-
 sub checkfor_p7zip
 {
 	# Test for system installed p7zip
 	my $testp7zipsys = `7z`;
-	
+
 	# If we do not have p7zip
 	if ($testp7zipsys !~ /7-Zip/)
 	{
@@ -222,8 +192,3 @@ sub checkfor_p7zip
 		get_p7zip();
 	}
 }
-
-#
-#---------------------------------------- *** ----------------------------------------
-#
-

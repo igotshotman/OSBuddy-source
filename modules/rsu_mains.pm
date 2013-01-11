@@ -79,8 +79,19 @@ sub unix_main
 			# Tell OpenJDK to use alsa (aoss does not work as OpenJDK is usually set to use PulseAudio over Alsa)
 			$rsu_data->javabin = $rsu_data->javabin." -Djavax.sound.sampled.Clip=com.sun.media.sound.DirectAudioDeviceProvider -Djavax.sound.sampled.Port=com.sun.media.sound.PortMixerProvider -Djavax.sound.sampled.SourceDataLine=com.sun.media.sound.DirectAudioDeviceProvider -Djavax.sound.sampled.TargetDataLine=com.sun.media.sound.DirectAudioDeviceProvider";
 		}
+		# Set forcepulseaudio to false so that java dont get wrapped in pulse and alsa (chaotic results)
+		$rsu_data->forcepulseaudio = 0;
 	}	
-	
+	# Else if user requested to force use PulseAudio
+	elsif ($rsu_data->forcepulseaudio =~ /(1|true)/i)
+	{
+		# Print debug info
+		print "Forcing Java to use PulseAudio by wrapping it inside \"padsp\"!\n";
+
+		# Then edit $javabin into "padsp $javabin"
+		$rsu_data->javabin = "padsp ".$rsu_data->javabin;
+	}
+
 	# Display Java version we are using
 	print "Launching client using this Java version: \n";
 	
