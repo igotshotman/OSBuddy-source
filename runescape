@@ -90,48 +90,43 @@ Arguments:
 	exit;	
 }
 
-# If this script have been installed systemwide
-if ($rsu_data->cwd =~ /^(\/opt\/runescape)/)
+# Print debug info
+print "The script is running from ".$rsu_data->cwd."!\n".$rsu_data->HOME."/.config/runescape will be used as client folder!\n\n";
+		
+# Change clientdir to ~/.config/runescape
+$rsu_data->clientdir = $rsu_data->HOME."/.config/runescape";
+
+# Make a variable to contain the clientdir so we can use it in a command
+my $clientdir = $rsu_data->clientdir;		
+
+# Make the client folders
+unless (-d \"".$rsu_data->HOME."/.config/runescape/bin\"")
 {
-	# Print debug info
-	print "The script is running from a system path!\n".$rsu_data->HOME."/.config/runescape will be used as client folder!\n\n";
-		
-	# Make a variable to contain the clientdir so we can use it in a command
-	my $clientdir = $rsu_data->clientdir;
-	
-	# Change clientdir to ~/.config/runescape
-	$rsu_data->clientdir = $rsu_data->HOME."/.config/runescape/";
-		
-	# Make the client folders
-	unless (-d \"".$rsu_data->HOME."/.config/runescape/bin\"")
-	{
-		system("mkdir -p \"".$rsu_data->HOME."/.config/runescape/bin\"");
-	}
-	unless (-d \"".$rsu_data->HOME."/.config/runescape/settings\"")
-	{
-		system("mkdir -p \"".$rsu_data->HOME."/.config/runescape/settings\"");
-	}
+	system("mkdir -p \"".$rsu_data->HOME."/.config/runescape/bin\"");
+}
+unless (-d \"".$rsu_data->HOME."/.config/runescape/settings\"")
+{
+	system("mkdir -p \"".$rsu_data->HOME."/.config/runescape/settings\"");
+}
 
-	# Check if settings.conf exists
-	my $settings_exists = `ls $clientdir/settings | grep \"settings.conf\$\"`;
+# Check if settings.conf exists
+my $settings_exists = `ls -la $clientdir/settings|grep -P \"settings.conf\$\"`;
 
-	# If settings.conf does not exist
-	if ($settings_exists !~ /settings.conf/)
-	{
-		# Copy the example file to clientdir as settings.conf
-		system "cp -v \"".$rsu_data->cwd."/settings/settings.conf\" \"".$rsu_data->clientdir."/settings/settings.conf\"";
-	}
+# If settings.conf does not exist
+if ($settings_exists !~ /settings.conf/)
+{
+	# Copy the example file to clientdir as settings.conf
+	system "cp -v \"".$rsu_data->cwd."/settings/settings.conf\" \"".$rsu_data->clientdir."/settings/settings.conf\"";
+}
 
-	# Check if runescape.prm exists
-	my $prmfile_exists = `ls $clientdir/settings | grep \"runescape.prm\$\"`;
+# Check if runescape.prm exists
+my $prmfile_exists = `ls -la $clientdir/settings|grep -P \"runescape.prm\$\"`;
 		
-	# If runescape.prm does not exist
-	if ($prmfile_exists !~ /runescape.prm/)
-	{
-		# Copy the example file to clientdir as runescape.prm
-		system "cp -v \"".$rsu_data->cwd."/settings/runescape.prm\" \"".$rsu_data->clientdir."/settings/runescape.prm\"";
-	}
-		
+# If runescape.prm does not exist
+if ($prmfile_exists !~ /runescape.prm/)
+{
+	# Copy the example file to clientdir as runescape.prm
+	system "cp -v \"".$rsu_data->cwd."/settings/runescape.prm\" \"".$rsu_data->clientdir."/settings/runescape.prm\"";
 }
 
 # Due to legal reasons the file jagexappletviewer.jar is no longer included by default so we need to check if it exists
