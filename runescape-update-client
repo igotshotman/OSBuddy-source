@@ -10,7 +10,7 @@ my $HOME;
 $HOME = $ENV{"HOME"};
 
 # Make a variable to contain the client directory
-my $clientdir = "$HOME/.config/runescape/";
+my $clientdir = "$HOME/.config/runescape";
 
 # Command to fetch the official Windows client
 my $fetchcommand = "curl -L -o";
@@ -83,7 +83,7 @@ sub updatefromwindowsclient
 	system("$fetchcommand \"$clientdir/.updating/runescape.msi\" http://www.runescape.com/downloads/runescape.msi | zenity --title=\"Downloading the official RuneScape client from Jagex\" --progress --text=\"The script is now downloading the official RuneScape client from Jagex. Please wait...\" --pulsate --auto-kill --auto-close");
 
 	# Check if we can extract the jagexappletviewer.jar directly
-	my $jarfile = `7z l runescape.msi | grep "JagexAppletViewerJarFile*" | cut -c54-1000`;
+	my $jarfile = `cd \"$clientdir/.updating/\" && 7z l runescape.msi | grep "JagexAppletViewerJarFile*" | cut -c54-1000`;
 
 	# Remove newlines
 	$jarfile =~ s/(\n|\r|\r\n)//g;
