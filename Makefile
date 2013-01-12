@@ -10,7 +10,7 @@ install:
 	install -m 0644 launchers/runescape.desktop $(DESTDIR)/usr/share/applications/
 	install -m 0644 launchers/runescape-update-client.desktop $(DESTDIR)/usr/share/applications/
 	install -m 0644 launchers/icons/runescape.png $(DESTDIR)/usr/share/icons/hicolor/scalable/apps/
-	install -m 0644 launchers/icons/runescape-update-client.png $(DESTDIR)/usr/share/icons/hicolor/scalable/
+	install -m 0644 launchers/icons/runescape-update-client.png $(DESTDIR)/usr/share/icons/hicolor/scalable/apps/
 
 	install -m 0755 modules/rsu_IO.pm $(DESTDIR)/opt/runescape/modules/
 	install -m 0755 modules/rsu_check_for_jagexappletviewer.pm $(DESTDIR)/opt/runescape/modules/

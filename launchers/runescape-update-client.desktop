@@ -6,5 +6,5 @@ GenericName=RuneScape Client Updater
 Comment=Update the RuneScape Client
 Icon=/usr/share/icons/hicolor/scalable/apps/runescape-update-client.png
 Terminal=false
-Exec=update-runescape-client
+Exec=runescape-update-client
 Categories=GNOME;GTK;Game;
