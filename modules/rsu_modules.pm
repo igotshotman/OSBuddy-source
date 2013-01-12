@@ -1,8 +1,8 @@
 # This is the modules loader, include load lines in this file
 # The modules can be ordered in any order even if they depend 
-# on a module which have not been loaded yet
+# on a module which has not been loaded yet
 package modules;
-	# Include(if not already included) the core modules for the RSU client
+	# Include (if not already included) the core modules for the RuneScape Client
 	require rsu_check_for_jagexappletviewer;
 	require rsu_IO;
 	require rsu_language_support;
@@ -11,16 +11,12 @@ package modules;
 	require rsu_java;
 	require rsu_javalib_opengl;
 	require rsu_mains;
-	
 	# End of core modules, add custom modules below this line
 
-	# End of custom modules #
 1;
 
-
 # List of data that you get access to if you pass the variable $rsu_data
-# to your functions (need to be passed to your function from the runescape script first)
-#
+# to your functions (need to be passed to your function from the RuneScape Script first)
 # $rsu_data = data container
 # $rsu_data->version = scriptversion
 # $rsu_data->cwd = current directory

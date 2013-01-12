@@ -79,7 +79,7 @@ Arguments:
    --verbose:class
           Make Java display selected verbose output
    
-   All 3 of the above verbose modes can be used together by listing them all.		
+   Any of the last three verbose modes above can be combined. Passing all three is equal to passing --verbose.	
 
    Save verbose output to a file:
    Simply add \"&> \$HOME/verbose.txt\" at the end of the command like this.
@@ -193,7 +193,10 @@ sub parseargs
 			{
 				# Split the parameter by =
 				my @prmname = split /=/, $arg;
-				
+
+				# show debug info
+				print "setting $prmname[0] to $prmname[1]\n";
+
 				# Return the setting found in the parameter
 				return "$prmname[1]";
 			}

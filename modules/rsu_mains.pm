@@ -45,10 +45,10 @@ sub unix_main
 	# Pass the Java binary to a variable so we can use it in commands
 	my $javabin = $rsu_data->javabin;
 	
-	# If user enabled Alsa sounds and OS is Linux
-	if ($rsu_data->forcealsa =~ /(1|true)/i && $rsu_data->OS =~ /linux/)
+	# If user enabled alsa sounds
+	if ($rsu_data->forcealsa =~ /(1|true)/i)
 	{
-		# Run the Java -version command and check if it is OpenJDK or Java (both uses different Alsa fixes)
+		# Run the Java -version command and check if it is OpenJDK or Java (both use different alsa fixes)
 		$rsu_data->javaversion = `$javabin -version 2>&1`;
 		
 		# Pass the result to a new variable
@@ -70,16 +70,16 @@ sub unix_main
 				$aoss = "aoss32";
 			}
 			
-			# Wrap Java inside aoss (Alsa wrapper)
+			# Wrap Java inside aoss (alsa wrapper)
 			$rsu_data->javabin = "$aoss ".$rsu_data->javabin;
 		}
 		# Else we are using OpenJDK
 		else
 		{
-			# Tell OpenJDK to use alsa (aoss does not work as OpenJDK is usually set to use PulseAudio over Alsa)
+			# Tell OpenJDK to use alsa (aoss does not work as OpenJDK is usually set to use PulseAudio over alsa)
 			$rsu_data->javabin = $rsu_data->javabin." -Djavax.sound.sampled.Clip=com.sun.media.sound.DirectAudioDeviceProvider -Djavax.sound.sampled.Port=com.sun.media.sound.PortMixerProvider -Djavax.sound.sampled.SourceDataLine=com.sun.media.sound.DirectAudioDeviceProvider -Djavax.sound.sampled.TargetDataLine=com.sun.media.sound.DirectAudioDeviceProvider";
 		}
-		# Set forcepulseaudio to false so that java dont get wrapped in pulse and alsa (chaotic results)
+		# Set forcepulseaudio to false so that Java wont get wrapped in both PulseAudio and alsa (chaotic results)
 		$rsu_data->forcepulseaudio = 0;
 	}	
 	# Else if user requested to force use PulseAudio
@@ -105,7 +105,7 @@ sub unix_main
 	$rsu_data->javabin = "$javalibpath ".$rsu_data->javabin;
 	
 	# Print debug info
-	print "\nLaunching the RuneScape Client using this command:\ncd ".$rsu_data->clientdir."/bin && ".$rsu_data->javabin." ".$rsu_data->verboseprms." -cp  $params /share\n\nExecuting the RuneScape Client!\nYou are now in the hands of Jagex.\n\n######## End Of Script ########\n######## Jagex client output will appear below here ########\n\n";
+	print "\nLaunching the RuneScape Client using this command:\ncd ".$rsu_data->clientdir."/bin && ".$rsu_data->javabin." ".$rsu_data->verboseprms." -cp  $params /share\n\nExecuting the RuneScape Client!\nYou are now in the hands of Jagex.\n\n######## End Of Script! Output from the official client will appear below ########\n\n";
 	
 	# Execute the RuneScape client (hopefully)
 	system "cd ".$rsu_data->clientdir."/bin && ".$rsu_data->javabin." ".$rsu_data->verboseprms." -cp  $params /share 2>&1";
