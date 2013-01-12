@@ -21,7 +21,7 @@
 my $scriptversion = "3.9.2";
 
 # Before starting show runescape script version
-print "RuneScape Unix Client script version $scriptversion\n\n";
+print "RuneScape Unix Client script, version $scriptversion\n\n";
 
 # Use FindBin module to get script directory
 use FindBin;
@@ -156,7 +156,7 @@ $rsu_data->forcealsa = parseargs("forcealsa", "0");
 $rsu_data->prmfile = parseargs("prmfile", "runescape.prm");
 
 # Define fallbackprms incase we cannot read settings/runescape.prm
-$rsu_data->fallbackprms = "jagexappletviewer.jar -Dsun.java2d.noddraw=true -Dcom.jagex.config=http://www.runescape.com/k=3/l=\$(Language:0)/jav_config.ws -Xss2m -Xmx512m -XX:CompileThreshold=1500 -Xincgc -XX:+UseConcMarkSweepGC -XX:+UseParNewGC jagexappletviewer ";
+$rsu_data->fallbackprms = "jagexappletviewer.jar -Dsun.java2d.noddraw=true -Dcom.jagex.config=http://www.runescape.com/k=3/l=\$(Language:0)/jav_config.ws -Xss1m -Xmx1024m -jagexappletviewer ";
 
 ########################################################################
 #DO NOT EDIT THE CODE BELOW THIS LINE UNLESS YOU KNOW WHAT YOU ARE DOING!
