@@ -1,4 +1,5 @@
 install:
+	mkdir -p $(DESTDIR)/opt/runescape/
 	mkdir -p $(DESTDIR)/usr/share/applications/
 	mkdir -p $(DESTDIR)/usr/share/icons/hicolor/scalable/apps/
 
