@@ -15,6 +15,7 @@ install:
 	install -m 0644 settings/* $(DESTDIR)/opt/runescape/settings
 	install -m 0644 launchers/runescape.desktop $(DESTDIR)/usr/share/applications/
 	install -m 0644 launchers/runescape-update-client.desktop $(DESTDIR)/usr/share/applications/
+	install -m 0644 launchers/runescape-launcher.desktop $(DESTDIR)/usr/share/applications/
 	install -m 0644 launchers/icons/runescape.png $(DESTDIR)/usr/share/icons/hicolor/scalable/apps/
 	install -m 0644 launchers/icons/runescape-update-client.png $(DESTDIR)/usr/share/icons/hicolor/scalable/apps/
 
