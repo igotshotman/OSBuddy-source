@@ -1,5 +1,12 @@
+prefix = /usr
+datarootdir = ${prefix}/share
+localedir = ${datarootdir}/locale
+
 runescape-launcher: runescape-launcher.c
-	cc -Wall -pedantic -std=c99 `pkg-config --cflags --libs gtk+-3.0 webkitgtk-3.0` runescape-launcher.c -o runescape-launcher
+	gcc -Wall -pedantic -std=c99 `pkg-config --cflags --libs gtk+-3.0 webkitgtk-3.0` runescape-launcher.c -o runescape-launcher
+
+runescape-update-client: runescape-update-client.c
+	gcc -Wall -pedantic `pkg-config --cflags --libs libcurl` runescape-update-client.c -o runescape-update-client
 
 install:
 	mkdir -p $(DESTDIR)/opt/runescape/
@@ -21,3 +28,4 @@ install:
 
 clean:
 	rm -rf runescape-launcher
+	rm -rf runescape-update-client
