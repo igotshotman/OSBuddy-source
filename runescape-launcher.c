@@ -18,12 +18,9 @@
  */
 
 #include <gtk/gtk.h>
-#include <webkit/webkit.h>
 #include <glib.h>
-#include <glib/gstdio.h>
-#include <glib/gprintf.h>
 #include <glib/gi18n.h>
-#include <unistd.h>
+#include <webkit/webkit.h>
 
 gchar *installpath;
 
@@ -55,13 +52,13 @@ update_client (GtkButton* button)
 }
 
 static void
-dialog_close (GtkDialog *dialog, gint response_id)
+dialog_close (GtkWidget *about_dialog)
 {
-	gtk_widget_destroy (GTK_WIDGET (dialog));
+	gtk_widget_destroy (GTK_WIDGET (about_dialog));
 }
 
 static void
-dialog_open (GSimpleAction *simple, GVariant *parameter)
+dialog_open ()
 {
 	GtkWidget *about_dialog;
 
@@ -131,14 +128,14 @@ create_window (void)
 	box_scroll = gtk_box_new (GTK_ORIENTATION_VERTICAL, 5);
 	/* Create scroll container to hold the webkit view*/
 	scroll = gtk_scrolled_window_new (NULL, NULL);
-    g_object_set (scroll, "shadow-type", GTK_SHADOW_IN, NULL);
+	g_object_set (scroll, "shadow-type", GTK_SHADOW_IN, NULL);
 	/* Create webkit view and point it to runescape.com */
 	WebKitWebView *view = WEBKIT_WEB_VIEW(webkit_web_view_new());
 	webkit_web_view_load_uri(view, "http://services.runescape.com/m=news/list.ws");
 	/* Add VIEW to SCROLL */
-    gtk_container_add (GTK_CONTAINER (scroll), GTK_WIDGET(view));
+	gtk_container_add (GTK_CONTAINER (scroll), GTK_WIDGET(view));
 	/* Add scroll to box_scroll */
-    gtk_box_pack_start (GTK_BOX (box_scroll), scroll, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (box_scroll), scroll, TRUE, TRUE, 0);
 
 	/* Add box_scroll to box_all first, so it appears left of the buttons */
 	gtk_box_pack_start (GTK_BOX (box_all), box_scroll, TRUE, TRUE, 0);
