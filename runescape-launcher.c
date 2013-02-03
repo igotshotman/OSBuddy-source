@@ -33,24 +33,12 @@ static GOptionEntry entries[] =
 	{ NULL }
 };
 
-gchar *installpath;
-
-char *
-getcurrentpath()
-{
-	installpath = g_get_current_dir();
-	if(debug)
-		g_fprintf(stdout, "current directory: %s\n", installpath);
-	return installpath;
-}
-
 static void
 launch_client (GtkButton* button)
 {
 	gchar *runescape_launch;
 
-	getcurrentpath();
-	runescape_launch = g_build_filename(installpath, "runescape", NULL);
+	runescape_launch = g_find_program_in_path("runescape");
 	if(debug)
 		g_fprintf(stdout, "runescape_launch: %s\n", runescape_launch);
 	execl(runescape_launch, runescape_launch, NULL);
@@ -61,8 +49,7 @@ update_client (GtkButton* button)
 {
 	gchar *runescape_update;
 
-	getcurrentpath();
-	runescape_update = g_build_filename(installpath, "runescape-update-client", NULL);
+	runescape_update = g_find_program_in_path("runescape-update-client");
 	if(debug)
 		g_fprintf(stdout, "runescape_update: %s\n", runescape_update);
 	execl(runescape_update, runescape_update, NULL);

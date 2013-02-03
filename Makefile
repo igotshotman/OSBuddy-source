@@ -1,7 +1,7 @@
 PREFIX ?= /opt/runescape
 
 runescape-launcher: runescape-launcher.c
-	gcc -Wall -pedantic -std=c99 `pkg-config --cflags --libs gtk+-3.0 webkitgtk-3.0` runescape-launcher.c -o runescape-launcher
+	gcc -g -Wall -pedantic -std=c99 `pkg-config --cflags --libs gtk+-3.0 webkitgtk-3.0` runescape-launcher.c -o runescape-launcher
 
 runescape-update-client: runescape-update-client.c
 	gcc -Wall -pedantic `pkg-config --cflags --libs gtk+-3.0 libcurl` runescape-update-client.c -o runescape-update-client
