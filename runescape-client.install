@@ -1,0 +1,13 @@
+post_install() {
+	echo "Making symlinks from /opt/runescape to /usr/bin"
+	ln -s /opt/runescape/runescape /usr/bin/runescape
+	ln -s /opt/runescape/runescape-update-client /usr/bin/runescape-update-client
+	ln -s /opt/runescape/runescape-launcher /usr/bin/runescape-launcher
+}
+
+pre_remove() {
+	echo "Removing symlinks in /usr/bin"
+	rm /usr/bin/runescape
+	rm /usr/bin/runescape-update-client
+	rm /usr/bin/runescape-launcher
+}
