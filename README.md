@@ -39,7 +39,6 @@ When all dependencies are installed, simply run the following commands to instal
 `make install`
 
 ## ToDo
-* make uninstall
 * improve makefile
 * improve error handling
 * port the runescape perl script and all its modules to C
