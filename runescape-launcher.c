@@ -17,10 +17,21 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdlib.h>
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <glib/gi18n.h>
+#include <glib/gstdio.h>
+#include <glib/gprintf.h>
 #include <webkit/webkit.h>
+
+static gboolean debug = FALSE;
+
+static GOptionEntry entries[] =
+{
+	{ "debug", 'd', 0, G_OPTION_ARG_NONE, &debug, "Turn on debug information", NULL },
+	{ NULL }
+};
 
 gchar *installpath;
 
@@ -28,6 +39,8 @@ char *
 getcurrentpath()
 {
 	installpath = g_get_current_dir();
+	if(debug)
+		g_fprintf(stdout, "current directory: %s\n", installpath);
 	return installpath;
 }
 
@@ -38,6 +51,8 @@ launch_client (GtkButton* button)
 
 	getcurrentpath();
 	runescape_launch = g_build_filename(installpath, "runescape", NULL);
+	if(debug)
+		g_fprintf(stdout, "runescape_launch: %s\n", runescape_launch);
 	execl(runescape_launch, runescape_launch, NULL);
 }
 
@@ -48,6 +63,8 @@ update_client (GtkButton* button)
 
 	getcurrentpath();
 	runescape_update = g_build_filename(installpath, "runescape-update-client", NULL);
+	if(debug)
+		g_fprintf(stdout, "runescape_update: %s\n", runescape_update);
 	execl(runescape_update, runescape_update, NULL);
 }
 
@@ -160,6 +177,17 @@ int
 main (int argc, char *argv[])
 {
  	GtkWidget *window;
+	GError *error_parsearg = NULL;
+	GOptionContext *context;
+
+	context = g_option_context_new ("- a launcher to the RuneScape applications");
+	g_option_context_add_main_entries (context, entries, NULL);
+	g_option_context_add_group (context, gtk_get_option_group (TRUE));
+	if (!g_option_context_parse (context, &argc, &argv, &error_parsearg))
+	{
+		g_fprintf (stderr, "%s\n", error_parsearg->message);
+		exit (EXIT_FAILURE);
+	}
 
 	gtk_init (&argc, &argv);
 	window = create_window ();
