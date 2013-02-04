@@ -1,10 +1,11 @@
-PREFIX ?= /opt/runescape
+#PREFIX ?= /opt/runescape
+#DEBUG = -g -pedantic
 
 runescape-launcher: runescape-launcher.c
-	gcc runescape-launcher.c -o runescape-launcher -Wall -pedantic -std=c99 `pkg-config --cflags --libs gtk+-3.0 webkitgtk-3.0`
+	gcc runescape-launcher.c -o runescape-launcher -Wall `pkg-config --cflags --libs gtk+-3.0 webkitgtk-3.0`
 
 runescape-update-client: runescape-update-client.c
-	gcc runescape-update-client.c -o runescape-update-client -Wall -pedantic `pkg-config --cflags --libs gtk+-3.0 libcurl`
+	gcc runescape-update-client.c -o runescape-update-client -Wall `pkg-config --cflags --libs gtk+-3.0 libcurl`
 
 install:
 	mkdir -p $(DESTDIR)/opt/runescape/
