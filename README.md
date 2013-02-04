@@ -10,11 +10,7 @@ to practice my programming in C, which is beginner at best).
 Currently, I am in the process of converting the runescape perl script and all its modules to C. Progress is slow
 since my experience with C is beginner at best, so all original perl script will still be provided.
 
-The "RuneScape" perl script is written by HikariKnight, but is based on
-Ethoxyethaan's shellscript to run the RuneScape Windows client natively.
-
-For more information, see HikariKnight's website:
-http://hkprojects.weebly.com
+The "RuneScape" perl script is written by HikariKnight, but is based on Ethoxyethaan's shellscript to run the RuneScape Windows client natively. For more information, see HikariKnight's website: http://hkprojects.weebly.com
 
 RuneScape is a registred trademark of Jagex Inc.
 
