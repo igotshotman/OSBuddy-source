@@ -34,6 +34,8 @@ When all dependencies are installed, simply run the following commands to instal
 
 `make install`
 
+To uninstall the RuneScape Client, simply run `make uninstall`.
+
 ## ToDo
 * improve makefile
 * improve error handling
