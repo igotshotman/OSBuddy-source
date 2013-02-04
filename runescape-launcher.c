@@ -102,8 +102,7 @@ dialog_open ()
 static GtkWidget*
 create_window (void)
 {
-	GtkWidget *window, *box_all, *box_scroll, *box_button, *button_play, *button_update, *button_about, *scroll;
-	GtkWidget *view;
+	GtkWidget *window, *box_all, *box_scroll, *box_button, *button_play, *button_update, *button_about, *scroll, *view;
 
 	/* Set up the UI */
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
