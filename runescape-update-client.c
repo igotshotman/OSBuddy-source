@@ -135,8 +135,8 @@ downloadwindowsclient()
 				if(debug)
 					g_fprintf(stderr, "curl_easy_perform() failed: %s\n\n", curl_easy_strerror(res));
 				error_dialog = gtk_message_dialog_new ((GtkWindow *)window, GTK_DIALOG_DESTROY_WITH_PARENT,
-														GTK_MESSAGE_ERROR, 
-														GTK_BUTTONS_OK, 
+														GTK_MESSAGE_ERROR,
+														GTK_BUTTONS_OK,
 														"Download failed!\n");
 				g_signal_connect (GTK_DIALOG (error_dialog), "response", G_CALLBACK (gtk_main_quit), NULL);
 				gtk_dialog_run(GTK_DIALOG(error_dialog));
@@ -167,8 +167,8 @@ updatefromwindowsclient()
 	jarfile = popen("7z l runescape.msi | grep JagexAppletViewerJarFile* | cut -c54-1000", "r");
 	if (jarfile == NULL) {
 		error_dialog = gtk_message_dialog_new ((GtkWindow *)window, GTK_DIALOG_DESTROY_WITH_PARENT,
-												GTK_MESSAGE_ERROR, 
-												GTK_BUTTONS_OK, 
+												GTK_MESSAGE_ERROR,
+												GTK_BUTTONS_OK,
 												"Failed to run command, probably because you do not have p7zip installed.\nPlease doulbe check this and try again\n");
 		g_signal_connect (GTK_DIALOG (error_dialog), "response", G_CALLBACK (gtk_main_quit), NULL);
 		gtk_dialog_run(GTK_DIALOG(error_dialog));
@@ -187,9 +187,9 @@ updatefromwindowsclient()
 
 	if(access(applet, F_OK ) == -1 ) {
 		error_dialog = gtk_message_dialog_new ((GtkWindow *)window, GTK_DIALOG_DESTROY_WITH_PARENT,
-                                            GTK_MESSAGE_ERROR, 
-                                            GTK_BUTTONS_OK, 
-                                            "Something went wrong; could not read jagexappletviewer.jar!\n");
+												GTK_MESSAGE_ERROR,
+												GTK_BUTTONS_OK,
+												"Something went wrong; could not read jagexappletviewer.jar!\n");
 		g_signal_connect (GTK_DIALOG (error_dialog), "response", G_CALLBACK (gtk_main_quit), NULL);
 		gtk_dialog_run(GTK_DIALOG(error_dialog));
 	} else {
@@ -208,9 +208,9 @@ update_client (GtkButton* button)
 	updatefromwindowsclient();
 
 	message_dialog = gtk_message_dialog_new ((GtkWindow *)window, GTK_DIALOG_MODAL,
-                                            GTK_MESSAGE_INFO, 
-                                            GTK_BUTTONS_OK, 
-                                            "Done running the update process! You can now launch the RuneScape script to start playing!\n");
+											GTK_MESSAGE_INFO,
+											GTK_BUTTONS_OK,
+											"Done running the update process! You can now launch the RuneScape script to start playing!\n");
 	gtk_widget_show_all (message_dialog);
 	g_signal_connect (GTK_DIALOG (message_dialog), "response", G_CALLBACK (gtk_main_quit), NULL);
 }
