@@ -28,7 +28,7 @@ To install RuneScape Client for Linux, you will need the following dependencies:
 * gtk3
 * webkitgtk3
 
-To be able to compile Runescape Client for Linux, you also need the GTK3 development packages. On Ubuntu, this is `libgtk-3-dev`, on Fedora it is `gtk3-devel`. Debian users need at least Debian testing; the GTK3 development libraries are called `libgtk-3-dev`.
+To be able to compile Runescape Client for Linux, you also need the GTK3 development packages. On Ubuntu, this is `libgtk-3-dev`, on Fedora it is `gtk3-devel`. Debian users need at least Debian Wheezy (testing); the GTK3 development libraries are called `libgtk-3-dev`.
 
 When all dependencies are installed, simply run the following commands to install every component:
 
