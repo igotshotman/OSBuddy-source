@@ -43,8 +43,9 @@ When all dependencies are installed, simply run the following commands to instal
 * improve error handling
 * port the runescape perl script and all its modules to C
 * runescape-launcher.c
-	* fix the compile messages
+	* about dialog icon doesn't show
 * runescape-update-client.c
+	* about dialog icon doesn't show
 	* get rid of `popen` and `system`: replace with glib alternatives
 	* actually, the whole `updatefromwindowsclient` function needs check for glib alternatives
 	* when cancel button is clicked during download, cancel the download (and close the window)
