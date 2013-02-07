@@ -58,7 +58,7 @@ gchar *
 setupfiles(void) {
 	const gchar *system_config_dir;
 	const gchar* const *system_config_dirs;
-	gchar *runescape_config_dir, *runescape_settings_dir, *runescape_update_client;
+	gchar *runescape_config_dir, *runescape_settings_dir; /**runescape_update_client;*/
 	gchar *installed_settings_file, *installed_prm_file;
 	gint i;
 	GError *error_spawn = NULL;
@@ -115,9 +115,8 @@ setupfiles(void) {
 
 	if(g_file_test (runescape_bin_dir, G_FILE_TEST_EXISTS) == FALSE) {
 		g_fprintf(stderr, "Could not find %s/jagexappletviewer.jar. We will run runescape-update-client now so it will be installed.\n", runescape_bin_dir);
-		/*runescape_update_client = g_find_program_in_path("runescape-update-client");*/
 		/*runescape_update_client = { g_find_program_in_path("runescape-update-client"), NULL };*/
-		argv[0] = g_find_program_in_path("runescape-update-client");;
+		argv[0] = g_find_program_in_path("runescape-update-client");
 		argv[1] = NULL;
 		g_spawn_sync(NULL, argv, NULL, G_SPAWN_SEARCH_PATH_FROM_ENVP, NULL, NULL, NULL, NULL, NULL, &error_spawn);
 		if (error_spawn) {
