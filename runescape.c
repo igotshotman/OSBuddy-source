@@ -61,6 +61,7 @@ setupfiles(void) {
 	gchar *runescape_config_dir, *runescape_settings_dir, *runescape_update_client;
 	gchar *installed_settings_file, *installed_prm_file;
 	gint i;
+	GError *error_spawn = NULL;
 
 	runescape_config_dir = g_build_filename(g_get_user_config_dir(), "runescape", NULL);
 	runescape_bin_dir = g_build_filename (runescape_config_dir, "bin", NULL);
@@ -113,8 +114,12 @@ setupfiles(void) {
 
 	if(g_file_test (runescape_bin_dir, G_FILE_TEST_EXISTS) == FALSE) {
 		g_fprintf(stderr, "Could not find %s/jagexappletviewer.jar. We will run runescape-update-client now so it will be installed.\n", runescape_bin_dir);
-		runescape_update_client = g_find_program_in_path("runescape-update-client");
-		execl(runescape_update_client, runescape_update_client, NULL);
+		runescape_update_client = { g_find_program_in_path("runescape-update-client"), NULL };
+		g_spawn_sync(NULL, &runescape_update_client, NULL, G_SPAWN_SEARCH_PATH_FROM_ENVP, NULL, NULL, NULL, NULL, NULL, &error_spawn);
+		if (error_spawn) {
+			g_fprintf (stderr, "%s\n", error_spawn->message);
+			exit (EXIT_FAILURE);
+		}
 	}
 
 	return runescape_settings_file;
@@ -188,8 +193,7 @@ main(int argc, char *argv[]) {
 	context = g_option_context_new ("- launch the RuneScape Client");
 	g_option_context_add_main_entries (context, entries, NULL);
 	g_option_context_add_group (context, gtk_get_option_group (TRUE));
-	if (!g_option_context_parse (context, &argc, &argv, &error_parsearg))
-	{
+	if (!g_option_context_parse (context, &argc, &argv, &error_parsearg)) {
 		g_fprintf (stderr, "%s\n", error_parsearg->message);
 		exit (EXIT_FAILURE);
 	}
