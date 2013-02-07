@@ -43,7 +43,7 @@ To uninstall the RuneScape Client, simply run `make uninstall`.
 * improve error handling
 * runescape.c
 	* ~~continue with application after running runescape-update-client~~
-		* runescape.c:118:29: fout: expected expression before ‘{’ token
+		* code looks like it can be improved
 	* implement skipping of commented lines, instead of making variable (null)
 	* proper language support (currently through runescape.prm) from jagexappletviewer.preferences
 	* check which java is installed (openjdk/oracle)
