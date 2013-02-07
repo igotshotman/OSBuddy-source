@@ -39,10 +39,18 @@ To uninstall the RuneScape Client, simply run `make uninstall`.
 ## ToDo
 * improve makefile
 * improve error handling
-* port the runescape perl script and all its modules to C
+* runescape.c
+	* continue with application after running runescape-update-client
+	* implement skipping of commented lines, instead of making variable (null)
+	* proper language support (currently through runescape.prm) from jagexappletviewer.preferences
+	* check which java is installed (openjdk/oracle)
+		* implement aoss wrapper when java = oracle
+	* implement opengl fix
+	* implement check for -client mode java
 * runescape-launcher.c
 	* about dialog icon doesn't show
 * runescape-update-client.c
+	* "Update client" button should stay pressed when downloading
 	* about dialog icon doesn't show
 	* get rid of `popen` and `system`: replace with glib alternatives
 	* actually, the whole `updatefromwindowsclient` function needs check for glib alternatives
