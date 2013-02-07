@@ -62,6 +62,7 @@ setupfiles(void) {
 	gchar *installed_settings_file, *installed_prm_file;
 	gint i;
 	GError *error_spawn = NULL;
+	gchar *argv[2];
 
 	runescape_config_dir = g_build_filename(g_get_user_config_dir(), "runescape", NULL);
 	runescape_bin_dir = g_build_filename (runescape_config_dir, "bin", NULL);
@@ -114,8 +115,11 @@ setupfiles(void) {
 
 	if(g_file_test (runescape_bin_dir, G_FILE_TEST_EXISTS) == FALSE) {
 		g_fprintf(stderr, "Could not find %s/jagexappletviewer.jar. We will run runescape-update-client now so it will be installed.\n", runescape_bin_dir);
-		runescape_update_client = { g_find_program_in_path("runescape-update-client"), NULL };
-		g_spawn_sync(NULL, &runescape_update_client, NULL, G_SPAWN_SEARCH_PATH_FROM_ENVP, NULL, NULL, NULL, NULL, NULL, &error_spawn);
+		runescape_update_client = g_find_program_in_path("runescape-update-client");
+		/*runescape_update_client = { g_find_program_in_path("runescape-update-client"), NULL };*/
+		argv[0] = runescape_update_client;
+		argv[1] = NULL;
+		g_spawn_sync(NULL, argv, NULL, G_SPAWN_SEARCH_PATH_FROM_ENVP, NULL, NULL, NULL, NULL, NULL, &error_spawn);
 		if (error_spawn) {
 			g_fprintf (stderr, "%s\n", error_spawn->message);
 			exit (EXIT_FAILURE);
@@ -159,6 +163,7 @@ parseprmfile(gchar *runescape_prm_file) {
 		url = g_key_file_get_string (prm, "Runescape", "url", NULL);
 		ram = g_key_file_get_string (prm, "Java", "ram", NULL);
 		stacksize = g_key_file_get_string (prm, "Java", "stacksize", NULL);
+		g_key_file_free(prm);
 	}
 
 	return class;
@@ -178,6 +183,7 @@ parsesettingsfile(gchar *runescape_settings_file) {
 	} else {
 		forcepulseaudio = g_key_file_get_string (settings, "Fixes", "forcepulseaudio", NULL);
 		forcealsa = g_key_file_get_string (settings, "Fixes", "forcealsa", NULL);
+		g_key_file_free(settings);
 	}
 
 	return forcepulseaudio;
