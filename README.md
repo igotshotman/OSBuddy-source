@@ -28,6 +28,8 @@ To be able to compile Runescape Client for Linux, you also need the GTK3 develop
 
 When all dependencies are installed, simply run the following commands to install every component:
 
+`make runescape`
+
 `make runescape-launcher`
 
 `make runescape-update-client`
