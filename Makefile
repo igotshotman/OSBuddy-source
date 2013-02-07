@@ -2,7 +2,7 @@
 #DEBUG = -g -pedantic
 
 runescape: runescape.c
-	gcc runescape.c -o runescapetest -Wall `pkg-config --cflags --libs gtk+-3.0`
+	gcc runescape.c -o runescape -Wall `pkg-config --cflags --libs gtk+-3.0`
 
 runescape-launcher: runescape-launcher.c
 	gcc runescape-launcher.c -o runescape-launcher -Wall `pkg-config --cflags --libs gtk+-3.0 webkitgtk-3.0`
