@@ -44,8 +44,8 @@ static GOptionEntry entries[] =
 	{ NULL }
 };
 
-gchar *runescape_bin_dir, *runescape_settings_file, *runescape_prm_file; /**appletviewer;*/
-/*int language = 0;*/
+gchar *runescape_bin_dir, *runescape_settings_file, *runescape_prm_file, *appletviewer;
+gchar *language = "0";
 gchar *url = "-Dcom.jagex.config=http://www.runescape.com/k=3/l=0/jav_config.ws";
 gchar *ram = "-Xmx1024m";
 gchar *stacksize= "-Xss1m";
@@ -56,7 +56,7 @@ gchar *
 setupfiles(void) {
 	const gchar *system_config_dir;
 	const gchar* const *system_config_dirs;
-	gchar *runescape_config_dir, *runescape_settings_dir; /**runescape_update_client;*/
+	gchar *runescape_config_dir, *runescape_settings_dir;
 	gchar *installed_settings_file, *installed_prm_file;
 	gint i;
 	GError *error_spawn = NULL;
@@ -68,7 +68,7 @@ setupfiles(void) {
 
 	runescape_settings_file = g_build_filename (runescape_settings_dir, "settings.conf", NULL);
 	runescape_prm_file = g_build_filename (runescape_settings_dir, "runescape.prm", NULL);
-	/*appletviewer = g_build_filename (g_get_home_dir(), "jagexappletviewer.preferences", NULL);*/
+	appletviewer = g_build_filename (g_get_home_dir(), "jagexappletviewer.preferences", NULL);
 
 	if(debug) {
 		g_fprintf(stdout, "Runescape config directory: %s\n", runescape_config_dir);
@@ -113,7 +113,6 @@ setupfiles(void) {
 
 	if(g_file_test (runescape_bin_dir, G_FILE_TEST_EXISTS) == FALSE) {
 		g_fprintf(stderr, "Could not find %s/jagexappletviewer.jar. We will run runescape-update-client now so it will be installed.\n", runescape_bin_dir);
-		/*runescape_update_client = { g_find_program_in_path("runescape-update-client"), NULL };*/
 		argv[0] = g_find_program_in_path("runescape-update-client");
 		argv[1] = NULL;
 		g_spawn_sync(NULL, argv, NULL, G_SPAWN_SEARCH_PATH_FROM_ENVP, NULL, NULL, NULL, NULL, NULL, &error_spawn);
@@ -125,27 +124,8 @@ setupfiles(void) {
 
 	return runescape_settings_file;
 	return runescape_prm_file;
-	/*return appletviewer;*/
+	return appletviewer;
 }
-
-/*int
-parselanguage(gchar *appletviewer) {
-	gchar *langstring = NULL;
-	gsize length;
-	GError *error_opening_appletviewer = NULL;
-
-	if(g_file_get_contents(appletviewer, &langstring, &length, &error_opening_appletviewer) == FALSE) {
-		if(error_opening_appletviewer != NULL) {
-			g_fprintf(stderr, "Unable to read file: %s. Falling back to defaults.\n", error_opening_appletviewer->message);
-			g_error_free(error_opening_appletviewer);
-		}
-	} else {*/
-		/*cut language=, return integer only*/
-		/*g_fprintf(stdout, "Language: %d\n", language);
-	}
-
-	return language;
-}*/
 
 gchar *
 parseprmfile(gchar *runescape_prm_file) {
@@ -169,6 +149,47 @@ parseprmfile(gchar *runescape_prm_file) {
 	return url;
 	return ram;
 	return stacksize;
+}
+
+gchar *
+parselanguage(gchar *appletviewer) {
+	/*gchar *replace;*/
+	/*FILE *in = g_fopen (appletviewer, "r");
+	if(!in) {
+		g_fprintf(stderr, "Unable to read file: %s. Falling back to defaults.\n", appletviewer);
+	} else {
+		fscanf(in, "Language=%d", &language);
+		g_sprintf(url, "-Dcom.jagex.config=http://www.runescape.com/k=3/l=%d/jav_config.ws", language);
+		replace = g_strrstr(url, "?");
+		strncpy (replace, language, 1);
+	}*/
+
+	gchar *langstring = NULL, *replace;
+	gsize length;
+	GError *error_opening_appletviewer = NULL;
+
+	if(g_file_get_contents(appletviewer, &langstring, &length, &error_opening_appletviewer) == FALSE) {
+		if(error_opening_appletviewer != NULL) {
+			g_fprintf(stderr, "Unable to read file: %s. Falling back to defaults.\n", error_opening_appletviewer->message);
+			g_error_free(error_opening_appletviewer);
+		}
+	} else {
+		langstring[strlen(langstring)-1] = '\0';
+		if(g_strcmp0(langstring, "Language=0") == 0) {
+			language = "0";
+		} else if(g_strcmp0(langstring, "Language=1") == 0) {
+			language = "1";
+		} else if(g_strcmp0(langstring, "Language=2") == 0) {
+			language = "2";
+		} else if(g_strcmp0(langstring, "Language=3") == 0) {
+			language = "3";
+		}
+		/*sscanf(langstring, "Language=%s", language);*/
+		replace = g_strrstr(url, "?");
+		strncpy (replace, language, 1);
+	}
+
+	return language;
 }
 
 gchar *
@@ -203,14 +224,14 @@ main(int argc, char *argv[]) {
 	}
 
 	setupfiles();
-	/*parselanguage(appletviewer);*/
 	parseprmfile(runescape_prm_file);
+	parselanguage(appletviewer);
 	parsesettingsfile(runescape_settings_file);
 
 	java_binary = g_find_program_in_path("java");
 
 	if(debug) {
-		g_fprintf(stdout, "Url:%s\n", url);
+		g_fprintf(stdout, "Url:%s\nLanguage: %s\n", url, language);
 		g_fprintf(stdout, "Ram: %s\nStacksize: %s\n", ram, stacksize);
 		g_fprintf(stdout, "Pulseaudio: %s\nAlsa: %s\n\n", forcepulseaudio, forcealsa);
 		g_fprintf(stdout, "Java binary: %s\n\n", java_binary);
