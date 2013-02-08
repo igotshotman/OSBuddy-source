@@ -3,12 +3,12 @@
  * runescape-update-client.c
  * Copyright (C) 2013 Jente <jthidskes@outlook.com>
  *
- * runescape-update-client is free software: you can redistribute it and/or modify it
+ * runescape-update-client.c is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * runescape-update-client is distributed in the hope that it will be useful, but
+ * runescape-update-client.c is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
@@ -35,7 +35,7 @@ static GOptionEntry entries[] =
 	{ NULL }
 };
 
-GtkWidget *window, *progressbar;
+GtkWidget *window, *progressbar, *button_update;
 GError *error_parsearg = NULL, *error_config_dir = NULL, *error_bin_dir = NULL;
 gchar *runescape_config_dir, *runescape_bin_dir;
 
@@ -112,7 +112,7 @@ downloadwindowsclient()
 
 	g_chdir(runescape_bin_dir);
 
-	if(access("runescape.msi", F_OK ) == -1 ) {
+	if(g_file_test ("runescape.msi", G_FILE_TEST_EXISTS) == FALSE ) {
 		if(debug)
 			g_fprintf(stdout, "Did not find runescape.msi, so we will download it now\n\n");
 		curl = curl_easy_init();
@@ -185,7 +185,7 @@ updatefromwindowsclient()
 	system(extractcommand);
 	g_rename(extract, applet);
 
-	if(access(applet, F_OK ) == -1 ) {
+	if(g_file_test (applet, G_FILE_TEST_EXISTS) == FALSE ) {
 		error_dialog = gtk_message_dialog_new ((GtkWindow *)window, GTK_DIALOG_DESTROY_WITH_PARENT,
 												GTK_MESSAGE_ERROR,
 												GTK_BUTTONS_OK,
@@ -203,6 +203,7 @@ static void
 update_client (GtkButton* button)
 {
 	GtkWidget *message_dialog;
+	gtk_toggle_button_set_active ((GtkToggleButton *)button_update, TRUE);
 	getdirs();
 	downloadwindowsclient();
 	updatefromwindowsclient();
@@ -225,7 +226,7 @@ static void
 about_open ()
 {
 	GtkWidget *about_dialog;
-
+	gchar *license_trans;
 	const gchar *authors[] = {"Unia (Jente)", "HikariKnight", NULL};
 	const gchar *license[] = {
 		N_("The RuneScape Client is free software: you can redistribute it and/or modify "
@@ -238,9 +239,8 @@ about_open ()
 		   "GNU General Public License for more details."),
 		N_("You should have received a copy of the GNU General Public License "
 		   "along with this program. If not, see <http://www.gnu.org/licenses/>.")
-};
+	};
 
-	gchar *license_trans;
 	license_trans = g_strjoin ("\n\n", _(license[0]), _(license[1]), _(license[2]), NULL);
 
 	about_dialog = gtk_about_dialog_new ();
@@ -262,7 +262,7 @@ about_open ()
 static GtkWidget*
 create_window (void)
 {
-	GtkWidget *label_main, *box_all, *box_button, *box_progressbar, *button_update, *button_cancel, *button_about;
+	GtkWidget *label_main, *box_all, *box_button, *box_progressbar, *button_cancel, *button_about;
 
 	/* Set up the TOPLEVEL WINDOW */
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -297,7 +297,8 @@ create_window (void)
 	/* Create about button */
 	button_about = gtk_button_new_with_label (_("About"));
 	/* Create update button */
-	button_update = gtk_button_new_with_label (_("Update client"));
+	/*button_update = gtk_button_new_with_label (_("Update client"));*/
+	button_update = gtk_toggle_button_new_with_label (_("Update client"));
 	/* Create play button */
 	button_cancel = gtk_button_new_with_label (_("Cancel"));
 	/* Add all buttons to box_button in this order, so they appear from left to right properly*/

@@ -54,7 +54,8 @@ To uninstall the RuneScape Client, simply run `make uninstall`.
 * runescape-launcher.c
 	* about dialog icon doesn't show
 * runescape-update-client.c
-	* "Update client" button should stay pressed when downloading
+	* ~~"Update client" button should stay pressed when downloading~~
+		* 'block' "Update client" button once it is pressed
 	* about dialog icon doesn't show
 	* get rid of `popen` and `system`: replace with glib alternatives
 	* actually, the whole `updatefromwindowsclient` function needs check for glib alternatives
