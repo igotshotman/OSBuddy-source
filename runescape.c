@@ -32,7 +32,7 @@ static gboolean debug = FALSE;
 static gboolean verbose = FALSE;
 static gboolean jni = FALSE;
 static gboolean gc = FALSE;
-static gboolean vclass = FALSE;
+static gboolean class = FALSE;
 
 static GOptionEntry entries[] =
 {
@@ -40,14 +40,12 @@ static GOptionEntry entries[] =
 	{ "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Turn on all Java verbose output, equals all of the below combined", NULL },
 	{ "verbose:jni", 'j', 0, G_OPTION_ARG_NONE, &jni, "Java: report information about use of native methods and other Java Native Interface activity", NULL },
 	{ "verbose:gc", 'g', 0, G_OPTION_ARG_NONE, &gc, "Java: report on each garbage collection event", NULL },
-	{ "verbose:class", 'c', 0, G_OPTION_ARG_NONE, &vclass, "Java: display information about each class loaded", NULL },
+	{ "verbose:class", 'c', 0, G_OPTION_ARG_NONE, &class, "Java: display information about each class loaded", NULL },
 	{ NULL }
 };
 
 gchar *runescape_bin_dir, *runescape_settings_file, *runescape_prm_file; /**appletviewer;*/
 /*int language = 0;*/
-gchar *class = "-Djava.class.path=jagexappletviewer.jar";
-gchar *noddraw = "-Dsun.java2d.noddraw=true";
 gchar *url = "-Dcom.jagex.config=http://www.runescape.com/k=3/l=0/jav_config.ws";
 gchar *ram = "-Xmx1024m";
 gchar *stacksize= "-Xss1m";
@@ -157,16 +155,17 @@ parseprmfile(gchar *runescape_prm_file) {
 	if(g_key_file_load_from_file (prm, runescape_prm_file, G_KEY_FILE_NONE, NULL) == FALSE) {
 		g_fprintf(stderr, "Unable to read any runescape.prm file. Please check if the RuneScape Client is installed properly. Falling back to defaults.\n\n");
 	} else {
-		class = g_key_file_get_string (prm, "Runescape", "class", NULL);
-		noddraw = g_key_file_get_string (prm, "Runescape", "noddraw", NULL);
 		url = g_key_file_get_string (prm, "Runescape", "url", NULL);
 		ram = g_key_file_get_string (prm, "Java", "ram", NULL);
 		stacksize = g_key_file_get_string (prm, "Java", "stacksize", NULL);
 		g_key_file_free(prm);
 	}
 
-	return class;
-	return noddraw;
+	if(!url) {
+		g_fprintf(stderr, "Url can not be commented out! We will use the defaults.\n\n");
+		url = "-Dcom.jagex.config=http://www.runescape.com/k=3/l=0/jav_config.ws";
+	}
+
 	return url;
 	return ram;
 	return stacksize;
@@ -211,13 +210,15 @@ main(int argc, char *argv[]) {
 	java_binary = g_find_program_in_path("java");
 
 	if(debug) {
-		g_fprintf(stdout, "Class: %s\nNoddraw: %s\nUrl:%s\n", class, noddraw, url);
+		g_fprintf(stdout, "Url:%s\n", url);
 		g_fprintf(stdout, "Ram: %s\nStacksize: %s\n", ram, stacksize);
 		g_fprintf(stdout, "Pulseaudio: %s\nAlsa: %s\n\n", forcepulseaudio, forcealsa);
 		g_fprintf(stdout, "Java binary: %s\n\n", java_binary);
 	}
 
-	launchcommand = g_strjoin(" ", java_binary, "-cp jagexappletviewer.jar", class, noddraw, url, ram, stacksize, NULL);
+	launchcommand = g_strjoin(" ", java_binary, "-cp jagexappletviewer.jar", "-Djava.class.path=jagexappletviewer.jar", url, NULL);
+	launchcommand = g_strjoin(" ", launchcommand, ram, NULL);
+	launchcommand = g_strjoin(" ", launchcommand, stacksize, NULL);
 	if(debug) {
 		launchcommand = g_strjoin(" ", launchcommand, "-Xdebug", NULL);
 	}
@@ -230,7 +231,7 @@ main(int argc, char *argv[]) {
 	if(gc) {
 		launchcommand = g_strjoin(" ", launchcommand, "-verbose:gc", NULL);
 	}
-	if(vclass) {
+	if(class) {
 		launchcommand = g_strjoin(" ", launchcommand, "-verbose:class", NULL);
 	}
 	if(g_strcmp0(forcepulseaudio, "true") == 0) {

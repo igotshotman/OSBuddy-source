@@ -7,9 +7,6 @@
 # 3 = Portugese
 
 [Runescape]
-# Jagex default settings.
-class=-Djava.class.path=jagexappletviewer.jar
-noddraw=-Dsun.java2d.noddraw=true
 url=-Dcom.jagex.config=http://www.runescape.com/k=3/l=0/jav_config.ws
 
 [Java]
