@@ -47,7 +47,6 @@ To uninstall the RuneScape Client, simply run `make uninstall`.
 	* ~~implement skipping of commented lines, instead of making variable (null)~~
 		* again, code looks like it can be improved
 	* ~~proper language support (currently through runescape.prm) from jagexappletviewer.preferences~~
-		* improve code, as always
 	* check which java is installed (openjdk/oracle)
 		* implement aoss wrapper when java = oracle
 	* implement opengl fix
