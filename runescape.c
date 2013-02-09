@@ -45,9 +45,8 @@ static GOptionEntry entries[] =
 };
 
 gchar *runescape_bin_dir, *runescape_settings_file, *runescape_prm_file, *appletviewer;
-gint language = 0;
-gchar *url = "-Dcom.jagex.config=http://www.runescape.com/k=3/l=0/jav_config.ws";
-gchar *world = NULL;
+gchar *url;
+gchar *world;
 gchar *ram = "-Xmx1024m";
 gchar *stacksize= "-Xss1m";
 gchar *forcepulseaudio = "false";
@@ -132,31 +131,31 @@ parseprmfile(gchar *runescape_prm_file) {
 	if(g_key_file_load_from_file (prm, runescape_prm_file, G_KEY_FILE_NONE, NULL) == FALSE) {
 		g_fprintf(stderr, "Unable to read any runescape.prm file. Please check if the RuneScape Client is installed properly. Falling back to defaults.\n\n");
 	} else {
-		url = g_key_file_get_string (prm, "Runescape", "url", NULL);
-		world = g_key_file_get_string (prm, "Runescape", "url", NULL);
+		world = g_key_file_get_string (prm, "Runescape", "world", NULL);
 		ram = g_key_file_get_string (prm, "Java", "ram", NULL);
 		stacksize = g_key_file_get_string (prm, "Java", "stacksize", NULL);
 		g_key_file_free(prm);
 	}
 
-	if(!url) {
-		g_fprintf(stderr, "Url can not be commented out! We will use the defaults.\n\n");
-		url = "-Dcom.jagex.config=http://www.runescape.com/k=3/l=0/jav_config.ws";
+	if(world) {
+		url = g_strdup_printf("-Dcom.jagex.config=http://%s.runescape.com/k=3/l=?/jav_config.ws", world);
+	} else {
+		url = g_strdup_printf("-Dcom.jagex.config=http://%s.runescape.com/k=3/l=?/jav_config.ws", "www");
 	}
-	/*if(world) {
-		g_sprintf(url, "-Dcom.jagex.config=http://www.runescape.com/k=3/l=0/jav_config.ws", world);
-		url = "-Dcom.jagex.config=http://www.runescape.com/k=3/l=0/jav_config.ws";
-	}*/
 }
 
 void
-parselanguage(gchar *appletviewer) {
+parselanguage(gchar *appletviewer, gchar *url) {
 	gchar *langstring = NULL;
 
+	g_fprintf(stdout, "URLLLL: %s\n", url);
 	if(g_file_get_contents(appletviewer, &langstring, NULL, NULL) == FALSE) {
-		g_fprintf(stderr, "Unable to read file: %s. Falling back to defaults.\n", appletviewer);
+		g_fprintf(stderr, "Unable to read file: %s. Falling back to English.\n", appletviewer);
+		langstring = "Language=0";
+		*g_strrstr(url, "?") = langstring[9];
 	} else {
 		*g_strrstr(url, "?") = langstring[9];
+		g_free(langstring);
 	}
 }
 
@@ -190,13 +189,13 @@ main(int argc, char *argv[]) {
 
 	setupfiles();
 	parseprmfile(runescape_prm_file);
-	parselanguage(appletviewer);
+	parselanguage(appletviewer, url);
 	parsesettingsfile(runescape_settings_file);
 
 	java_binary = g_find_program_in_path("java");
 
 	if(debug) {
-		g_fprintf(stdout, "Url:%s\nLanguage: %d\n", url, language);
+		g_fprintf(stdout, "Url: %s\nWorld:%s\n", url, world);
 		g_fprintf(stdout, "Ram: %s\nStacksize: %s\n", ram, stacksize);
 		g_fprintf(stdout, "Pulseaudio: %s\nAlsa: %s\n\n", forcepulseaudio, forcealsa);
 		g_fprintf(stdout, "Java binary: %s\n\n", java_binary);
