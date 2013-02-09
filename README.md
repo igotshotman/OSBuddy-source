@@ -57,8 +57,9 @@ To uninstall the RuneScape Client, simply run `make uninstall`.
 	* ~~"Update client" button should stay pressed when downloading~~
 		* 'block' "Update client" button once it is pressed
 	* ~~about dialog icon doesn't show~~
-	* get rid of `popen` and `system`: replace with glib alternatives
-	* actually, the whole `updatefromwindowsclient` function needs check for glib alternatives
+	* ~~get rid of `popen` and `system`: replace with glib alternatives~~
+	* ~~actually, the whole `updatefromwindowsclient` function needs check for glib alternatives~~
+		* there are none; at least definetely not for popen and fgets. system and strlen do just what we need, instead of the more complicated g_spawn_sync and g_strlcpy 
 	* when cancel button is clicked during download, cancel the download (and close the window)
 	* at `res != CURLE_OK`: exit when press OK on error dialog -> remove exit(EXIT_FAILURE)
 	* before downloading `runescape.msi`, check if it is the complete file;

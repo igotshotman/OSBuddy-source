@@ -42,12 +42,10 @@ gchar *runescape_config_dir, *runescape_bin_dir;
 void
 getdirs()
 {
-	const gchar *user_config_dir;
 	GDir *config2, *bindir2;
 	GtkWidget *error_dialog;
 
-	user_config_dir = g_get_user_config_dir();
-	runescape_config_dir = g_build_filename(user_config_dir, "runescape", NULL);
+	runescape_config_dir = g_build_filename(g_get_user_config_dir(), "runescape", NULL);
 	if (runescape_config_dir != NULL) {
 		config2 = g_dir_open(runescape_config_dir, 0, &error_config_dir);
 		if (error_config_dir) {
@@ -75,7 +73,6 @@ getdirs()
 	}
 
 	if(debug) {
-		g_fprintf(stdout, "User config directory: %s\n", user_config_dir);
 		g_fprintf(stdout, "Runescape config directory: %s\n", runescape_config_dir);
 		g_fprintf(stdout, "Runescape bin directory: %s\n\n", runescape_bin_dir);
 	}
@@ -159,9 +156,9 @@ updatefromwindowsclient()
 	GtkWidget *error_dialog;
 
 	FILE *jarfile;
-	char extract[100];
-	static char extractcommand[122] = "7z e -y runescape.msi ";
-	const gchar *applet = "jagexappletviewer.jar";
+	gchar extract[100];
+	gchar *extractcommand = "7z e -y runescape.msi";
+	gchar *appletviewer = "jagexappletviewer.jar";
 
 	g_chdir(runescape_bin_dir);
 	jarfile = popen("7z l runescape.msi | grep JagexAppletViewerJarFile* | cut -c54-1000", "r");
@@ -169,23 +166,23 @@ updatefromwindowsclient()
 		error_dialog = gtk_message_dialog_new ((GtkWindow *)window, GTK_DIALOG_DESTROY_WITH_PARENT,
 												GTK_MESSAGE_ERROR,
 												GTK_BUTTONS_OK,
-												"Failed to run command, probably because you do not have p7zip installed.\nPlease doulbe check this and try again\n");
+												"Failed to run command, probably because you do not have p7zip installed.\nPlease double check this and try again\n");
 		g_signal_connect (GTK_DIALOG (error_dialog), "response", G_CALLBACK (gtk_main_quit), NULL);
 		gtk_dialog_run(GTK_DIALOG(error_dialog));
 	}
 
 	fgets(extract, sizeof(extract), jarfile);
+	pclose(jarfile);
 	extract[strlen(extract)-1] = '\0';
 	if(debug)
 		g_fprintf(stdout, "Jarfile: %s\n\n", extract);
-	pclose(jarfile);
-	strcat(extractcommand, extract);
+	extractcommand = g_strjoin(" ", extractcommand, extract, NULL);
 	if(debug)
 		g_fprintf(stdout, "We will use this command to extract jagexappletviewer.jar:\n    %s\n\n", extractcommand);
 	system(extractcommand);
-	g_rename(extract, applet);
+	g_rename(extract, appletviewer);
 
-	if(g_file_test (applet, G_FILE_TEST_EXISTS) == FALSE ) {
+	if(g_file_test (appletviewer, G_FILE_TEST_EXISTS) == FALSE ) {
 		error_dialog = gtk_message_dialog_new ((GtkWindow *)window, GTK_DIALOG_DESTROY_WITH_PARENT,
 												GTK_MESSAGE_ERROR,
 												GTK_BUTTONS_OK,
