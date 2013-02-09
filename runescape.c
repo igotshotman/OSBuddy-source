@@ -47,6 +47,7 @@ static GOptionEntry entries[] =
 gchar *runescape_bin_dir, *runescape_settings_file, *runescape_prm_file, *appletviewer;
 gchar *url;
 gchar *world;
+gchar *language = NULL;
 gchar *ram = "-Xmx1024m";
 gchar *stacksize= "-Xss1m";
 gchar *forcepulseaudio = "false";
@@ -136,26 +137,13 @@ parseprmfile(gchar *runescape_prm_file) {
 		stacksize = g_key_file_get_string (prm, "Java", "stacksize", NULL);
 		g_key_file_free(prm);
 	}
-
-	if(world) {
-		url = g_strdup_printf("-Dcom.jagex.config=http://%s.runescape.com/k=3/l=?/jav_config.ws", world);
-	} else {
-		url = g_strdup_printf("-Dcom.jagex.config=http://%s.runescape.com/k=3/l=?/jav_config.ws", "www");
-	}
 }
 
 void
-parselanguage(gchar *appletviewer, gchar *url) {
-	gchar *langstring = NULL;
-
-	g_fprintf(stdout, "URLLLL: %s\n", url);
-	if(g_file_get_contents(appletviewer, &langstring, NULL, NULL) == FALSE) {
+parselanguage(gchar *appletviewer) {
+	if(g_file_get_contents(appletviewer, &language, NULL, NULL) == FALSE) {
 		g_fprintf(stderr, "Unable to read file: %s. Falling back to English.\n", appletviewer);
-		langstring = "Language=0";
-		*g_strrstr(url, "?") = langstring[9];
-	} else {
-		*g_strrstr(url, "?") = langstring[9];
-		g_free(langstring);
+		language = "Language=0";
 	}
 }
 
@@ -189,13 +177,19 @@ main(int argc, char *argv[]) {
 
 	setupfiles();
 	parseprmfile(runescape_prm_file);
-	parselanguage(appletviewer, url);
+	parselanguage(appletviewer);
 	parsesettingsfile(runescape_settings_file);
+
+	if(world) {
+		url = g_strdup_printf("-Dcom.jagex.config=http://%s.runescape.com/k=3/l=%d/jav_config.ws", world, language[9]-48);
+	} else {
+		url = g_strdup_printf("-Dcom.jagex.config=http://www.runescape.com/k=3/l=%d/jav_config.ws", language[9]-48);
+	}
 
 	java_binary = g_find_program_in_path("java");
 
 	if(debug) {
-		g_fprintf(stdout, "Url: %s\nWorld:%s\n", url, world);
+		g_fprintf(stdout, "World:%s\nLanguage:%d\n", world, language[9]-48);
 		g_fprintf(stdout, "Ram: %s\nStacksize: %s\n", ram, stacksize);
 		g_fprintf(stdout, "Pulseaudio: %s\nAlsa: %s\n\n", forcepulseaudio, forcealsa);
 		g_fprintf(stdout, "Java binary: %s\n\n", java_binary);
@@ -238,6 +232,15 @@ main(int argc, char *argv[]) {
 		}
 	}
 	launchcommand = g_strjoin(" ", launchcommand, "jagexappletviewer /share", NULL);
+
+	g_free(url);
+	g_free(world);
+	g_free(language);
+	g_free(ram);
+	g_free(stacksize);
+	g_free(forcepulseaudio);
+	g_free(forcealsa);
+	g_free(java_binary);
 
 	if(debug) {
 		g_fprintf(stdout, "Launch command: %s\n\n", launchcommand);
