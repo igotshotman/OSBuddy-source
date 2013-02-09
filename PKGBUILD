@@ -1,6 +1,6 @@
 pkgname=runescape-client-git
 pkgbase=runescape-client
-pkgver=20130204
+pkgver=20130209
 pkgrel=1
 pkgdesc="Runescape Client for Linux"
 arch=(any)
@@ -8,7 +8,6 @@ url="https://github.com/Unia/runescape-client"
 license=(GPL2)
 depends=('java-runtime' 'curl' 'perl' 'p7zip' 'gtk3' 'webkitgtk3')
 optdepends=()
-install='runescape-client.install'
 conflicts=('runescape-client-bin' 'unix-runescape-client')
 
 _gitroot="https://github.com/Unia/runescape-client"
