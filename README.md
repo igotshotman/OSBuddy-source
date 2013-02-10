@@ -59,7 +59,7 @@ To uninstall the RuneScape Client, simply run `make uninstall`.
 		* there are none; at least definetely not for popen and fgets. system and strlen do just what we need, instead of the more complicated g_spawn_sync and g_strlcpy 
 	* ~~when cancel button is clicked during download, cancel the download (and close the window)~~
 	* ~~at `res != CURLE_OK`: exit when press OK on error dialog -> remove exit(EXIT_FAILURE)~~
-		* ~~implemented exit(EXIT_FAILURE) everywhere, the other functions were off. this is proper behaviour~~
+		* implemented exit(EXIT_FAILURE) everywhere, the other functions were off. this is proper behaviour
 	* before downloading `runescape.msi`, check if it is the complete file;
 		* if not, remove it and start download;
 		* else, skip download (already implemented)
