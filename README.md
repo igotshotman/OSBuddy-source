@@ -50,7 +50,7 @@ To uninstall the RuneScape Client, simply run `make uninstall`.
 	* check which java is installed (openjdk/oracle)
 		* implement aoss wrapper when java = oracle
 	* implement opengl fix
-	* implement check for -client mode java
+	* ~~implement check for -client mode java~~
 * runescape-update-client.c
 	* ~~"Update client" button should stay pressed when downloading~~
 	* ~~about dialog icon doesn't show~~
