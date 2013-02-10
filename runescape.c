@@ -27,12 +27,14 @@
 #include <stdlib.h> /*system*/
 #include <stdio.h> /*popen*/
 #include <unistd.h> /*execl*/
+#include <sys/utsname.h> /*uname*/
 
 static gboolean debug = FALSE;
 static gboolean verbose = FALSE;
 static gboolean jni = FALSE;
 static gboolean gc = FALSE;
 static gboolean class = FALSE;
+static gboolean client_mode = FALSE;
 
 static GOptionEntry entries[] =
 {
@@ -61,7 +63,7 @@ setupfiles(void) {
 	gchar *installed_settings_file, *installed_prm_file;
 	gint i;
 	GError *error_spawn = NULL;
-	gchar *argv[2];
+	gchar *runescape_update_client[2];
 
 	runescape_config_dir = g_build_filename(g_get_user_config_dir(), "runescape", NULL);
 	runescape_bin_dir = g_build_filename (runescape_config_dir, "bin", NULL);
@@ -114,9 +116,9 @@ setupfiles(void) {
 
 	if(g_file_test (runescape_bin_dir, G_FILE_TEST_EXISTS) == FALSE) {
 		g_fprintf(stderr, "Could not find %s/jagexappletviewer.jar. We will run runescape-update-client now so it will be installed.\n", runescape_bin_dir);
-		argv[0] = g_find_program_in_path("runescape-update-client");
-		argv[1] = NULL;
-		g_spawn_sync(NULL, argv, NULL, G_SPAWN_SEARCH_PATH_FROM_ENVP, NULL, NULL, NULL, NULL, NULL, &error_spawn);
+		runescape_update_client[0] = g_find_program_in_path("runescape-update-client");
+		runescape_update_client[1] = NULL;
+		g_spawn_sync(NULL, runescape_update_client, NULL, G_SPAWN_SEARCH_PATH_FROM_ENVP, NULL, NULL, NULL, NULL, NULL, &error_spawn);
 		if (error_spawn) {
 			g_fprintf (stderr, "%s\n", error_spawn->message);
 			exit (EXIT_FAILURE);
@@ -166,6 +168,7 @@ main(int argc, char *argv[]) {
 	GError *error_parsearg = NULL;
 	GOptionContext *context;
 	gchar *launchcommand, *java_binary;
+	struct utsname my_uname;
 
 	context = g_option_context_new ("- launch the RuneScape Client");
 	g_option_context_add_main_entries (context, entries, NULL);
@@ -181,21 +184,38 @@ main(int argc, char *argv[]) {
 	parsesettingsfile(runescape_settings_file);
 
 	if(world) {
-		url = g_strdup_printf("-Dcom.jagex.config=http://%s.runescape.com/k=3/l=%d/jav_config.ws", world, language[9]-48);
+		url = g_strdup_printf("-Dcom.jagex.config=http://%s.runescape.com/k=3/l=%c/jav_config.ws", world, language[9]);
 	} else {
-		url = g_strdup_printf("-Dcom.jagex.config=http://www.runescape.com/k=3/l=%d/jav_config.ws", language[9]-48);
+		url = g_strdup_printf("-Dcom.jagex.config=http://www.runescape.com/k=3/l=%c/jav_config.ws", language[9]);
 	}
 
 	java_binary = g_find_program_in_path("java");
+	if(uname(&my_uname) == -1) {
+		if(debug)
+			g_fprintf(stdout, "Can not determine OS data type. We will assume java -client mode is not available\n\n");
+	} else {
+		if(g_strcmp0(my_uname.machine, "i386") == 0 || g_strcmp0(my_uname.machine, "i586") == 0 || g_strcmp0(my_uname.machine, "i686") == 0) {
+			client_mode = TRUE;
+			if(debug)
+				g_fprintf(stdout, "Data type supports java -client mode!\n\n");
+		} else {
+			if(debug)
+				g_fprintf(stdout, "Data type does not support java -client mode\n\n");
+		}
+	}
 
 	if(debug) {
-		g_fprintf(stdout, "World:%s\nLanguage:%d\n", world, language[9]-48);
+		g_fprintf(stdout, "World :%s\nLanguage: %c\n", world, language[9]);
 		g_fprintf(stdout, "Ram: %s\nStacksize: %s\n", ram, stacksize);
 		g_fprintf(stdout, "Pulseaudio: %s\nAlsa: %s\n\n", forcepulseaudio, forcealsa);
 		g_fprintf(stdout, "Java binary: %s\n\n", java_binary);
 	}
 
-	launchcommand = g_strjoin(" ", java_binary, "-cp jagexappletviewer.jar", "-Djava.class.path=jagexappletviewer.jar", url, NULL);
+	if(client_mode) {
+		launchcommand = g_strjoin(" ", java_binary, "-client", "-cp jagexappletviewer.jar", "-Djava.class.path=jagexappletviewer.jar", url, NULL);
+	} else {
+		launchcommand = g_strjoin(" ", java_binary, "-cp jagexappletviewer.jar", "-Djava.class.path=jagexappletviewer.jar", url, NULL);
+	}
 	launchcommand = g_strjoin(" ", launchcommand, ram, NULL);
 	launchcommand = g_strjoin(" ", launchcommand, stacksize, NULL);
 	if(debug) {
@@ -213,23 +233,16 @@ main(int argc, char *argv[]) {
 	if(class) {
 		launchcommand = g_strjoin(" ", launchcommand, "-verbose:class", NULL);
 	}
-	if(g_strcmp0(forcepulseaudio, "true") == 0) {
-		if(g_strcmp0(forcealsa, "true") != 0) {
-			launchcommand = g_strjoin(" ", "padsp", launchcommand, NULL);
-		} else if(g_strcmp0(forcealsa, "true") == 0) {
-			g_fprintf(stderr, "Can't use both alsa and pulseaudio! Please disable one or the other. Exiting.\n");
-			exit (EXIT_FAILURE);
-		}
-	} else if(g_strcmp0(forcealsa, "true") == 0) {
-		if(g_strcmp0(forcepulseaudio, "true") != 0) {
-			/*if (java_binary = opendjk)*/
+	if(g_strcmp0(forcepulseaudio, "true") == 0 && g_strcmp0(forcealsa, "true") == 0) {
+		g_fprintf(stderr, "Can't use both alsa and pulseaudio! Please disable one or the other. Exiting.\n");
+		exit (EXIT_FAILURE);
+	} else if(g_strcmp0(forcealsa, "true") == 0 && g_strcmp0(forcepulseaudio, "false") == 0) {
+		/*if (java_binary = opendjk)*/
 				launchcommand = g_strjoin(" ", launchcommand, "-Djavax.sound.sampled.Clip=com.sun.media.sound.DirectAudioDeviceProvider", "-Djavax.sound.sampled.Port=com.sun.media.sound.PortMixerProvider", "-Djavax.sound.sampled.SourceDataLine=com.sun.media.sound.DirectAudioDeviceProvider", "-Djavax.sound.sampled.TargetDataLine=com.sun.media.sound.DirectAudioDeviceProvider", NULL);
-			/*else if (java_binay = oracle)
+		/*else if (java_binay = oracle)
 				aoss wrapper*/
-		} else if(g_strcmp0(forcepulseaudio, "true") == 0) {
-			g_fprintf(stderr, "Can't use both pulseaudio and alsa! Please disable one or the other. Exiting.\n");
-			exit (EXIT_FAILURE);
-		}
+	} else if(g_strcmp0(forcealsa, "false") == 0 && g_strcmp0(forcepulseaudio, "true") == 0) {
+		launchcommand = g_strjoin(" ", "padsp", launchcommand, NULL);
 	}
 	launchcommand = g_strjoin(" ", launchcommand, "jagexappletviewer /share", NULL);
 
