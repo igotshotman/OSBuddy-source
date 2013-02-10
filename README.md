@@ -18,7 +18,6 @@ RuneScape is a registred trademark of Jagex Inc.
 
 To install RuneScape Client for Linux, you will need the following dependencies:
 * java-runtime
-* perl
 * libcurl
 * p7zip
 * gtk3
