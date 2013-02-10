@@ -27,7 +27,15 @@
 #include <stdlib.h> /*system*/
 #include <curl/curl.h>
 
+enum
+{
+  DL_NONE,
+  DL_PROGRESS,
+  DL_ABORT
+};
+
 static gboolean debug = FALSE;
+static int dl_state = DL_NONE;
 
 static GOptionEntry entries[] =
 {
@@ -61,6 +69,7 @@ getdirs()
 												"Could not read XDG_CONFIG_HOME\n");
 		g_signal_connect (GTK_DIALOG (error_dialog), "response", G_CALLBACK (gtk_main_quit), NULL);
 		gtk_dialog_run(GTK_DIALOG(error_dialog));
+		exit(EXIT_FAILURE);
 	}
 
 	runescape_bin_dir = g_build_filename (runescape_config_dir, "bin", NULL);
@@ -96,6 +105,7 @@ update_progressbar(GtkWidget *progressbar, double dltotal, double dlnow)
 	while (gtk_events_pending ())
 		gtk_main_iteration ();
 
+	return (dl_state == DL_ABORT);
 	return 0;
 }
 
@@ -129,15 +139,19 @@ downloadwindowsclient()
 			res = curl_easy_perform(curl);
 
 			if(res != CURLE_OK) {
-				if(debug)
-					g_fprintf(stderr, "curl_easy_perform() failed: %s\n\n", curl_easy_strerror(res));
-				error_dialog = gtk_message_dialog_new ((GtkWindow *)window, GTK_DIALOG_DESTROY_WITH_PARENT,
-														GTK_MESSAGE_ERROR,
-														GTK_BUTTONS_OK,
-														"Download failed!\n");
-				g_signal_connect (GTK_DIALOG (error_dialog), "response", G_CALLBACK (gtk_main_quit), NULL);
-				gtk_dialog_run(GTK_DIALOG(error_dialog));
-				exit(EXIT_FAILURE);
+				if(dl_state == DL_ABORT) {
+					exit(EXIT_SUCCESS);
+				} else {
+					if(debug)
+						g_fprintf(stderr, "curl_easy_perform() failed: %s\n\n", curl_easy_strerror(res));
+					error_dialog = gtk_message_dialog_new ((GtkWindow *)window, GTK_DIALOG_DESTROY_WITH_PARENT,
+															GTK_MESSAGE_ERROR,
+															GTK_BUTTONS_OK,
+															"Download canceled!\n");
+					g_signal_connect (GTK_DIALOG (error_dialog), "response", G_CALLBACK (gtk_main_quit), NULL);
+					gtk_dialog_run(GTK_DIALOG(error_dialog));
+					exit(EXIT_FAILURE);
+				}
 			}
 
 			curl_easy_cleanup(curl);
@@ -169,6 +183,7 @@ updatefromwindowsclient()
 												"Failed to run command, probably because you do not have p7zip installed.\nPlease double check this and try again\n");
 		g_signal_connect (GTK_DIALOG (error_dialog), "response", G_CALLBACK (gtk_main_quit), NULL);
 		gtk_dialog_run(GTK_DIALOG(error_dialog));
+		exit(EXIT_FAILURE);
 	}
 
 	fgets(extract, sizeof(extract), jarfile);
@@ -189,6 +204,7 @@ updatefromwindowsclient()
 												"Something went wrong; could not read jagexappletviewer.jar!\n");
 		g_signal_connect (GTK_DIALOG (error_dialog), "response", G_CALLBACK (gtk_main_quit), NULL);
 		gtk_dialog_run(GTK_DIALOG(error_dialog));
+		exit(EXIT_FAILURE);
 	} else {
 		if(!debug)
 			g_remove("runescape.msi");
@@ -200,7 +216,10 @@ static void
 update_client (GtkButton* button)
 {
 	GtkWidget *message_dialog;
+
 	gtk_widget_set_sensitive (button_update, FALSE);
+	dl_state = DL_PROGRESS;
+
 	getdirs();
 	downloadwindowsclient();
 	updatefromwindowsclient();
@@ -211,6 +230,15 @@ update_client (GtkButton* button)
 											"Done running the update process! You can now launch the RuneScape script to start playing!\n");
 	gtk_widget_show_all (message_dialog);
 	g_signal_connect (GTK_DIALOG (message_dialog), "response", G_CALLBACK (gtk_main_quit), NULL);
+}
+
+static void
+cancel (GtkButton* button)
+{
+	if (dl_state == DL_PROGRESS)
+		dl_state = DL_ABORT;
+	else if (dl_state == DL_NONE)
+		gtk_main_quit ();
 }
 
 static void
@@ -304,7 +332,7 @@ create_window (void)
 	/* Update the client when clicking button_update */
 	g_signal_connect (button_update, "clicked", G_CALLBACK (update_client), NULL);
 	/* Launch RuneScape client when clicking button_play */
-	g_signal_connect (button_cancel, "clicked", G_CALLBACK (gtk_main_quit), NULL);
+	g_signal_connect (button_cancel, "clicked", G_CALLBACK (cancel), NULL);
 	/* Open About dialog when clicking button_about */
 	g_signal_connect (button_about, "clicked", G_CALLBACK (about_open), NULL);
 
