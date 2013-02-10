@@ -200,7 +200,7 @@ static void
 update_client (GtkButton* button)
 {
 	GtkWidget *message_dialog;
-	gtk_toggle_button_set_active ((GtkToggleButton *)button_update, TRUE);
+	gtk_widget_set_sensitive (button_update, FALSE);
 	getdirs();
 	downloadwindowsclient();
 	updatefromwindowsclient();
@@ -294,7 +294,7 @@ create_window (void)
 	/* Create about button */
 	button_about = gtk_button_new_with_label (_("About"));
 	/* Create update button */
-	button_update = gtk_toggle_button_new_with_label (_("Update client"));
+	button_update = gtk_button_new_with_label (_("Update client"));
 	/* Create play button */
 	button_cancel = gtk_button_new_with_label (_("Cancel"));
 	/* Add all buttons to box_button in this order, so they appear from left to right properly*/
