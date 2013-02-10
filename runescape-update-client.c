@@ -25,6 +25,7 @@
 #include <glib/gprintf.h>
 #include <stdio.h> /*popen*/
 #include <stdlib.h> /*system*/
+#include <sys/stat.h> /*stat*/
 #include <curl/curl.h>
 
 enum
@@ -117,50 +118,71 @@ downloadwindowsclient()
 	CURLcode res;
 	GtkWidget *error_dialog;
 
-	g_chdir(runescape_bin_dir);
+	curl = curl_easy_init();
+	if(curl) {
+		fp = g_fopen("runescape.msi" , "wb");
+		curl_easy_setopt(curl, CURLOPT_URL, "http://www.runescape.com/downloads/runescape.msi");
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
 
-	if(g_file_test ("runescape.msi", G_FILE_TEST_EXISTS) == FALSE ) {
+		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, FALSE);
+		curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, update_progressbar);
+		curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, progressbar);
+
 		if(debug)
-			g_fprintf(stdout, "Did not find runescape.msi, so we will download it now\n\n");
-		curl = curl_easy_init();
-		if(curl) {
-			fp = g_fopen("runescape.msi" , "wb");
-			curl_easy_setopt(curl, CURLOPT_URL, "http://www.runescape.com/downloads/runescape.msi");
-			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
-			curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+			curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, FALSE);
-			curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, update_progressbar);
-			curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, progressbar);
+		res = curl_easy_perform(curl);
 
-			if(debug)
-				curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-
-			res = curl_easy_perform(curl);
-
-			if(res != CURLE_OK) {
-				if(dl_state == DL_ABORT) {
-					exit(EXIT_SUCCESS);
-				} else {
-					if(debug)
-						g_fprintf(stderr, "curl_easy_perform() failed: %s\n\n", curl_easy_strerror(res));
-					error_dialog = gtk_message_dialog_new ((GtkWindow *)window, GTK_DIALOG_DESTROY_WITH_PARENT,
-															GTK_MESSAGE_ERROR,
-															GTK_BUTTONS_OK,
-															"Download canceled!\n");
-					g_signal_connect (GTK_DIALOG (error_dialog), "response", G_CALLBACK (gtk_main_quit), NULL);
-					gtk_dialog_run(GTK_DIALOG(error_dialog));
-					exit(EXIT_FAILURE);
-				}
+		if(res != CURLE_OK) {
+			if(dl_state == DL_ABORT) {
+				exit(EXIT_SUCCESS);
+			} else {
+				if(debug)
+					g_fprintf(stderr, "curl_easy_perform() failed: %s\n\n", curl_easy_strerror(res));
+				error_dialog = gtk_message_dialog_new ((GtkWindow *)window, GTK_DIALOG_DESTROY_WITH_PARENT,
+														GTK_MESSAGE_ERROR,
+														GTK_BUTTONS_OK,
+														"Download canceled!\n");
+				g_signal_connect (GTK_DIALOG (error_dialog), "response", G_CALLBACK (gtk_main_quit), NULL);
+				gtk_dialog_run(GTK_DIALOG(error_dialog));
+				exit(EXIT_FAILURE);
 			}
+		}
 
-			curl_easy_cleanup(curl);
-			if(fp)
-				fclose(fp);
+		curl_easy_cleanup(curl);
+		if(fp)
+			fclose(fp);
+	}
+}
+
+void
+checkwindowsclient()
+{
+	struct stat st;
+	gint size;
+    
+	if(g_file_test ("runescape.msi", G_FILE_TEST_EXISTS) == TRUE ) {
+		if(debug) {
+			g_fprintf(stdout, "Found runescape.msi, checking size...\n");
+		}
+		stat("runescape.msi", &st);
+		size = st.st_size;
+		if(size != 23642112) {
+			if(debug) {
+				g_fprintf(stdout, "File is not complete, so we will remove it and download it again\n\n");
+			}
+			downloadwindowsclient();
+		} else {
+			if(debug) {
+				g_fprintf(stdout, "File is complete, so we will skip the download\n\n");
+			}
 		}
 	} else {
-		if(debug)
-			g_fprintf(stdout, "Found runescape.msi, so we will skip the download\n");
+		if(debug) {
+			g_fprintf(stdout, "Did not find runescape.msi, so we will download it now\n\n");
+		}
+		downloadwindowsclient();
 	}
 }
 
@@ -174,7 +196,6 @@ updatefromwindowsclient()
 	gchar *extractcommand = "7z e -y runescape.msi";
 	gchar *appletviewer = "jagexappletviewer.jar";
 
-	g_chdir(runescape_bin_dir);
 	jarfile = popen("7z l runescape.msi | grep JagexAppletViewerJarFile* | cut -c54-1000", "r");
 	if (jarfile == NULL) {
 		error_dialog = gtk_message_dialog_new ((GtkWindow *)window, GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -221,7 +242,8 @@ update_client (GtkButton* button)
 	dl_state = DL_PROGRESS;
 
 	getdirs();
-	downloadwindowsclient();
+	g_chdir(runescape_bin_dir);
+	checkwindowsclient();
 	updatefromwindowsclient();
 
 	message_dialog = gtk_message_dialog_new ((GtkWindow *)window, GTK_DIALOG_MODAL,
