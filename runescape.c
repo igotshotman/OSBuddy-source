@@ -118,7 +118,7 @@ setupfiles(void) {
 		g_fprintf(stderr, "Could not find %s/jagexappletviewer.jar. We will run runescape-update-client now so it will be installed.\n", runescape_bin_dir);
 		runescape_update_client[0] = g_find_program_in_path("runescape-update-client");
 		runescape_update_client[1] = NULL;
-		g_spawn_sync(NULL, runescape_update_client, NULL, G_SPAWN_SEARCH_PATH_FROM_ENVP, NULL, NULL, NULL, NULL, NULL, &error_spawn);
+		g_spawn_sync(NULL, runescape_update_client, NULL, 0, NULL, NULL, NULL, NULL, NULL, &error_spawn);
 		if (error_spawn) {
 			g_fprintf (stderr, "%s\n", error_spawn->message);
 			exit (EXIT_FAILURE);
@@ -246,14 +246,14 @@ main(int argc, char *argv[]) {
 	}
 	launchcommand = g_strjoin(" ", launchcommand, "jagexappletviewer /share", NULL);
 
-	g_free(url);
+	/*g_free(url);
 	g_free(world);
 	g_free(language);
 	g_free(ram);
 	g_free(stacksize);
 	g_free(forcepulseaudio);
 	g_free(forcealsa);
-	g_free(java_binary);
+	g_free(java_binary);*/
 
 	if(debug) {
 		g_fprintf(stdout, "Launch command: %s\n\n", launchcommand);

@@ -30,9 +30,6 @@ To be able to compile Runescape Client for Linux, you also need development pack
 * libglib-2.0-dev
 * libwebkitgtk-3.0-dev
 
-On Debian (no matter what version) libglib-2.0 2.34 is not yet available, so you will have to compile that yourself. See this website for instructions:
-http://developer.gnome.org/glib/2.34/glib-building.html
-
 On rpm-based distributions such as Fedora, you will need these:
 * gtk3-devel
 * libcurl-devel
