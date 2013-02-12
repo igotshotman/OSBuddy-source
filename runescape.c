@@ -167,7 +167,8 @@ int
 main(int argc, char *argv[]) {
 	GError *error_parsearg = NULL;
 	GOptionContext *context;
-	gchar *launchcommand, *java_binary;
+	FILE *ldd_output;
+	gchar *launchcommand, *java_binary, *ldd_command, opengl_fix[100], *ld_library_path;
 	struct utsname my_uname;
 
 	context = g_option_context_new ("- launch the RuneScape Client");
@@ -190,6 +191,18 @@ main(int argc, char *argv[]) {
 	}
 
 	java_binary = g_find_program_in_path("java");
+	ldd_command = g_strjoin(" ", "ldd", java_binary, "| awk '/libjli.so/ {print $3}'", NULL);
+	ldd_output = popen(ldd_command, "r");
+	if (ldd_output != NULL) {
+		fgets(opengl_fix, sizeof(opengl_fix), ldd_output);
+		pclose(ldd_output);
+		if(debug)
+			g_fprintf(stdout, "LD_LIBRARY_PATH: %s\n\n", opengl_fix);
+		ld_library_path = g_strjoin("", "LD_LIBRARY_PATH=", opengl_fix, NULL);
+	} else {
+		g_fprintf(stderr, "Could not retrieve the path to libjli.so: Java will run without OpenGL implementation\n\n");
+	}
+
 	if(uname(&my_uname) == -1) {
 		if(debug)
 			g_fprintf(stdout, "Can not determine OS data type. We will assume java -client mode is not available\n\n");
@@ -216,23 +229,20 @@ main(int argc, char *argv[]) {
 	} else {
 		launchcommand = g_strjoin(" ", java_binary, "-cp jagexappletviewer.jar", "-Djava.class.path=jagexappletviewer.jar", url, NULL);
 	}
+	if(ld_library_path)
+		launchcommand = g_strjoin(" ", ld_library_path, launchcommand, NULL);
 	launchcommand = g_strjoin(" ", launchcommand, ram, NULL);
 	launchcommand = g_strjoin(" ", launchcommand, stacksize, NULL);
-	if(debug) {
+	if(debug)
 		launchcommand = g_strjoin(" ", launchcommand, "-Xdebug", NULL);
-	}
-	if(verbose) {
+	if(verbose)
 		launchcommand = g_strjoin(" ", launchcommand, "-verbose", NULL);
-	}
-	if(jni) {
+	if(jni)
 		launchcommand = g_strjoin(" ", launchcommand, "-verbose:jni", NULL);
-	}
-	if(gc) {
+	if(gc)
 		launchcommand = g_strjoin(" ", launchcommand, "-verbose:gc", NULL);
-	}
-	if(class) {
+	if(class)
 		launchcommand = g_strjoin(" ", launchcommand, "-verbose:class", NULL);
-	}
 	if(g_strcmp0(forcepulseaudio, "true") == 0 && g_strcmp0(forcealsa, "true") == 0) {
 		g_fprintf(stderr, "Can't use both alsa and pulseaudio! Please disable one or the other. Exiting.\n");
 		exit (EXIT_FAILURE);

@@ -59,7 +59,8 @@ To uninstall the RuneScape Client, simply run `make uninstall` (as root).
 	* ~~proper language support (currently through runescape.prm) from jagexappletviewer.preferences~~
 	* check which java is installed (openjdk/oracle)
 		* implement aoss wrapper when java = oracle
-	* implement opengl fix
+	* ~~implement opengl fix~~
+		* see if there's a native C way of handling this
 	* ~~implement check for -client mode java~~
 * runescape-update-client.c
 	* ~~"Update client" button should stay pressed when downloading~~
