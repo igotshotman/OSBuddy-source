@@ -46,7 +46,7 @@ static GOptionEntry entries[] =
 	{ NULL }
 };
 
-gchar *runescape_bin_dir, *runescape_settings_file, *runescape_prm_file, *appletviewer;
+gchar *runescape_bin_dir, *runescape_settings_file, *appletviewer;
 gchar *url;
 gchar *world;
 gchar *language = NULL;
@@ -59,7 +59,7 @@ void
 setupfiles(void) {
 	const gchar *system_config_dir;
 	const gchar* const *system_config_dirs;
-	gchar *runescape_config_dir, *runescape_settings_dir, *installed_settings_file, *installed_prm_file, *runescape_update_client[2];
+	gchar *runescape_config_dir, *runescape_settings_dir, *installed_settings_file, *runescape_update_client[2];
 	gint i;
 	GError *error_spawn = NULL;
 
@@ -68,20 +68,18 @@ setupfiles(void) {
 	runescape_settings_dir = g_build_filename (runescape_config_dir, "settings", NULL);
 
 	runescape_settings_file = g_build_filename (runescape_settings_dir, "settings.conf", NULL);
-	runescape_prm_file = g_build_filename (runescape_settings_dir, "runescape.prm", NULL);
 	appletviewer = g_build_filename (g_get_home_dir(), "jagexappletviewer.preferences", NULL);
 
 	if(debug)
-		g_fprintf(stdout, "Runescape config directory: %s\nRunescape bin directory: %s\nRunescape settings directory: %s\nRunescape settings file: %s\nRunescape prm file: %s\n\n", runescape_config_dir, runescape_bin_dir, runescape_settings_dir, runescape_settings_file, runescape_prm_file);
+		g_fprintf(stdout, "Runescape config directory: %s\nRunescape bin directory: %s\nRunescape settings directory: %s\nRunescape settings file: %s\n\n", runescape_config_dir, runescape_bin_dir, runescape_settings_dir, runescape_settings_file);
 
 	system_config_dirs = g_get_system_config_dirs ();
 	for (i = 0; system_config_dirs[i]; i++) {
 		system_config_dir = g_build_filename (system_config_dirs[i], "runescape", NULL);
 		if (g_file_test (system_config_dir, G_FILE_TEST_IS_DIR)) {
 			installed_settings_file = g_build_filename (system_config_dir, "settings", "settings.conf", NULL);
-			installed_prm_file = g_build_filename (system_config_dir, "settings", "runescape.prm", NULL);
 			if(debug)
-				g_fprintf(stdout, "System config directory: %s\nInstalled settings file: %s\nInstalled prm file: %s\n\n", system_config_dir, installed_settings_file, installed_prm_file);
+				g_fprintf(stdout, "System config directory: %s\nInstalled settings file: %s\n\n", system_config_dir, installed_settings_file);
 		} else {
 			if(debug)
 				g_fprintf(stdout, "Could not retrieve any system config directories\n\n");
@@ -96,13 +94,6 @@ setupfiles(void) {
 			runescape_settings_file = installed_settings_file;
 		}
 	}
-	if(g_file_test (runescape_prm_file, G_FILE_TEST_EXISTS) == FALSE) {
-		if(g_file_test (installed_prm_file, G_FILE_TEST_EXISTS) == TRUE) {
-			if(debug)
-				g_fprintf(stdout, "Did not find %s, so we will use the system installed prm file.\n\n", runescape_prm_file);
-			runescape_prm_file = installed_prm_file;
-		}
-	}
 
 	if(g_file_test (runescape_bin_dir, G_FILE_TEST_EXISTS) == FALSE) {
 		g_fprintf(stderr, "Could not find %s/jagexappletviewer.jar. We will run runescape-update-client now so it will be installed.\n", runescape_bin_dir);
@@ -113,21 +104,6 @@ setupfiles(void) {
 			g_fprintf (stderr, "%s\n", error_spawn->message);
 			exit (EXIT_FAILURE);
 		}
-	}
-}
-
-void
-parseprmfile(gchar *runescape_prm_file) {
-	GKeyFile *prm;
-
-	prm = g_key_file_new();
-	if(g_key_file_load_from_file (prm, runescape_prm_file, G_KEY_FILE_NONE, NULL) == FALSE) {
-		g_fprintf(stderr, "Unable to read any runescape.prm file. Please check if the RuneScape Client is installed properly. Falling back to defaults.\n\n");
-	} else {
-		world = g_key_file_get_string (prm, "Runescape", "world", NULL);
-		ram = g_key_file_get_string (prm, "Java", "ram", NULL);
-		stacksize = g_key_file_get_string (prm, "Java", "stacksize", NULL);
-		g_key_file_free(prm);
 	}
 }
 
@@ -147,6 +123,9 @@ parsesettingsfile(gchar *runescape_settings_file) {
 	if(g_key_file_load_from_file (settings, runescape_settings_file, G_KEY_FILE_NONE, NULL) == FALSE) {
 		g_fprintf(stderr, "Unable to read any settings.conf file. Please check if the RuneScape Client is installed properly. Falling back to defaults.\n\n");
 	} else {
+		world = g_key_file_get_string (settings, "Runescape", "world", NULL);
+		ram = g_key_file_get_string (settings, "Java", "ram", NULL);
+		stacksize = g_key_file_get_string (settings, "Java", "stacksize", NULL);
 		forcepulseaudio = g_key_file_get_string (settings, "Fixes", "forcepulseaudio", NULL);
 		forcealsa = g_key_file_get_string (settings, "Fixes", "forcealsa", NULL);
 		g_key_file_free(settings);
@@ -170,7 +149,6 @@ main(int argc, char *argv[]) {
 	}
 
 	setupfiles();
-	parseprmfile(runescape_prm_file);
 	parselanguage(appletviewer);
 	parsesettingsfile(runescape_settings_file);
 
