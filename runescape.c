@@ -75,7 +75,7 @@ setupfiles(void) {
 	for (i = 0; system_config_dirs[i]; i++) {
 		system_config_dir = g_build_filename (system_config_dirs[i], "runescape", NULL);
 		if (g_file_test (system_config_dir, G_FILE_TEST_IS_DIR)) {
-			installed_settings_file = g_build_filename (system_config_dir, "settings", "settings.conf", NULL);
+			installed_settings_file = g_build_filename (system_config_dir, "settings.conf", NULL);
 			if(debug)
 				g_fprintf(stdout, "System config directory: %s\nInstalled settings file: %s\n\n", system_config_dir, installed_settings_file);
 		} else {
