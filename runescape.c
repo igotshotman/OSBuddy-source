@@ -59,11 +59,9 @@ void
 setupfiles(void) {
 	const gchar *system_config_dir;
 	const gchar* const *system_config_dirs;
-	gchar *runescape_config_dir, *runescape_settings_dir;
-	gchar *installed_settings_file, *installed_prm_file;
+	gchar *runescape_config_dir, *runescape_settings_dir, *installed_settings_file, *installed_prm_file, *runescape_update_client[2];
 	gint i;
 	GError *error_spawn = NULL;
-	gchar *runescape_update_client[2];
 
 	runescape_config_dir = g_build_filename(g_get_user_config_dir(), "runescape", NULL);
 	runescape_bin_dir = g_build_filename (runescape_config_dir, "bin", NULL);
@@ -73,13 +71,8 @@ setupfiles(void) {
 	runescape_prm_file = g_build_filename (runescape_settings_dir, "runescape.prm", NULL);
 	appletviewer = g_build_filename (g_get_home_dir(), "jagexappletviewer.preferences", NULL);
 
-	if(debug) {
-		g_fprintf(stdout, "Runescape config directory: %s\n", runescape_config_dir);
-		g_fprintf(stdout, "Runescape bin directory: %s\n", runescape_bin_dir);
-		g_fprintf(stdout, "Runescape settings directory: %s\n", runescape_settings_dir);
-		g_fprintf(stdout, "Runescape settings file: %s\n", runescape_settings_file);
-		g_fprintf(stdout, "Runescape prm file: %s\n\n", runescape_prm_file);
-	}
+	if(debug)
+		g_fprintf(stdout, "Runescape config directory: %s\nRunescape bin directory: %s\nRunescape settings directory: %s\nRunescape settings file: %s\nRunescape prm file: %s\n\n", runescape_config_dir, runescape_bin_dir, runescape_settings_dir, runescape_settings_file, runescape_prm_file);
 
 	system_config_dirs = g_get_system_config_dirs ();
 	for (i = 0; system_config_dirs[i]; i++) {
@@ -87,11 +80,8 @@ setupfiles(void) {
 		if (g_file_test (system_config_dir, G_FILE_TEST_IS_DIR)) {
 			installed_settings_file = g_build_filename (system_config_dir, "settings", "settings.conf", NULL);
 			installed_prm_file = g_build_filename (system_config_dir, "settings", "runescape.prm", NULL);
-			if(debug) {
-				g_fprintf(stdout, "System config directory: %s\n", system_config_dir);
-				g_fprintf(stdout, "Installed settings file: %s\n", installed_settings_file);
-				g_fprintf(stdout, "Installed prm file: %s\n\n", installed_prm_file);
-			}
+			if(debug)
+				g_fprintf(stdout, "System config directory: %s\nInstalled settings file: %s\nInstalled prm file: %s\n\n", system_config_dir, installed_settings_file, installed_prm_file);
 		} else {
 			if(debug)
 				g_fprintf(stdout, "Could not retrieve any system config directories\n\n");
@@ -196,8 +186,6 @@ main(int argc, char *argv[]) {
 	if (ldd_output != NULL) {
 		fgets(opengl_fix, sizeof(opengl_fix), ldd_output);
 		pclose(ldd_output);
-		if(debug)
-			g_fprintf(stdout, "LD_LIBRARY_PATH: %s\n\n", opengl_fix);
 		ld_library_path = g_strjoin("", "LD_LIBRARY_PATH=", opengl_fix, NULL);
 	} else {
 		g_fprintf(stderr, "Could not retrieve the path to libjli.so: Java will run without OpenGL implementation\n\n");
@@ -217,17 +205,21 @@ main(int argc, char *argv[]) {
 		}
 	}
 
-	if(debug) {
-		g_fprintf(stdout, "World :%s\nLanguage: %c\n", world, language[9]);
-		g_fprintf(stdout, "Ram: %s\nStacksize: %s\n", ram, stacksize);
-		g_fprintf(stdout, "Pulseaudio: %s\nAlsa: %s\n\n", forcepulseaudio, forcealsa);
-		g_fprintf(stdout, "Java binary: %s\n\n", java_binary);
-	}
+	if(debug)
+		g_fprintf(stdout, "LD_LIBRARY_PATH: %sWorld :%s\nLanguage: %c\nRam: %s\nStacksize: %s\nPulseaudio: %s\nAlsa: %s\nJava binary: %s\n\n", opengl_fix, world, language[9], ram, stacksize, forcepulseaudio, forcealsa, java_binary);
 
 	if(client_mode) {
 		launchcommand = g_strjoin(" ", java_binary, "-client", "-cp jagexappletviewer.jar", "-Djava.class.path=jagexappletviewer.jar", url, NULL);
 	} else {
 		launchcommand = g_strjoin(" ", java_binary, "-cp jagexappletviewer.jar", "-Djava.class.path=jagexappletviewer.jar", url, NULL);
+	}
+	if(g_strcmp0(forcepulseaudio, "true") == 0 && g_strcmp0(forcealsa, "true") == 0) {
+		g_fprintf(stderr, "Can't use both alsa and pulseaudio! Please disable one or the other. Exiting.\n");
+		exit (EXIT_FAILURE);
+	} else if(g_strcmp0(forcealsa, "true") == 0 && g_strcmp0(forcepulseaudio, "false") == 0) {
+				launchcommand = g_strjoin(" ", launchcommand, "-Djavax.sound.sampled.Clip=com.sun.media.sound.DirectAudioDeviceProvider", "-Djavax.sound.sampled.Port=com.sun.media.sound.PortMixerProvider", "-Djavax.sound.sampled.SourceDataLine=com.sun.media.sound.DirectAudioDeviceProvider", "-Djavax.sound.sampled.TargetDataLine=com.sun.media.sound.DirectAudioDeviceProvider", NULL);
+	} else if(g_strcmp0(forcealsa, "false") == 0 && g_strcmp0(forcepulseaudio, "true") == 0) {
+		launchcommand = g_strjoin(" ", "padsp", launchcommand, NULL);
 	}
 	if(ld_library_path)
 		launchcommand = g_strjoin(" ", ld_library_path, launchcommand, NULL);
@@ -243,27 +235,20 @@ main(int argc, char *argv[]) {
 		launchcommand = g_strjoin(" ", launchcommand, "-verbose:gc", NULL);
 	if(class)
 		launchcommand = g_strjoin(" ", launchcommand, "-verbose:class", NULL);
-	if(g_strcmp0(forcepulseaudio, "true") == 0 && g_strcmp0(forcealsa, "true") == 0) {
-		g_fprintf(stderr, "Can't use both alsa and pulseaudio! Please disable one or the other. Exiting.\n");
-		exit (EXIT_FAILURE);
-	} else if(g_strcmp0(forcealsa, "true") == 0 && g_strcmp0(forcepulseaudio, "false") == 0) {
-		/*if (java_binary = opendjk)*/
-				launchcommand = g_strjoin(" ", launchcommand, "-Djavax.sound.sampled.Clip=com.sun.media.sound.DirectAudioDeviceProvider", "-Djavax.sound.sampled.Port=com.sun.media.sound.PortMixerProvider", "-Djavax.sound.sampled.SourceDataLine=com.sun.media.sound.DirectAudioDeviceProvider", "-Djavax.sound.sampled.TargetDataLine=com.sun.media.sound.DirectAudioDeviceProvider", NULL);
-		/*else if (java_binay = oracle)
-				aoss wrapper*/
-	} else if(g_strcmp0(forcealsa, "false") == 0 && g_strcmp0(forcepulseaudio, "true") == 0) {
-		launchcommand = g_strjoin(" ", "padsp", launchcommand, NULL);
-	}
 	launchcommand = g_strjoin(" ", launchcommand, "jagexappletviewer /share", NULL);
 
-	/*g_free(url);
-	g_free(world);
-	g_free(language);
+	g_free(url);
+	if(world)
+		g_free(world);
+	if(language)
+		g_free(language);
 	g_free(ram);
 	g_free(stacksize);
 	g_free(forcepulseaudio);
 	g_free(forcealsa);
-	g_free(java_binary);*/
+	g_free(java_binary);
+	if(ld_library_path)
+		g_free(ld_library_path);
 
 	if(debug) {
 		g_fprintf(stdout, "Launch command: %s\n\n", launchcommand);
