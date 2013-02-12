@@ -20,7 +20,6 @@ install:
 	install -m 0755 runescape-launcher $(DESTDIR)/usr/bin/
 	install -m 0755 runescape-update-client $(DESTDIR)/usr/bin/
 	install -m 0644 settings/settings.conf $(DESTDIR)/etc/xdg/runescape/settings/
-	install -m 0644 settings/runescape.prm $(DESTDIR)/etc/xdg/runescape/settings/
 	install -m 0644 launchers/runescape.desktop $(DESTDIR)/usr/share/applications/
 	install -m 0644 launchers/runescape-launcher.desktop $(DESTDIR)/usr/share/applications/
 	install -m 0644 launchers/runescape-update-client.desktop $(DESTDIR)/usr/share/applications/
