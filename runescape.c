@@ -59,19 +59,17 @@ void
 setupfiles(void) {
 	const gchar *system_config_dir;
 	const gchar* const *system_config_dirs;
-	gchar *runescape_config_dir, *runescape_settings_dir, *installed_settings_file, *runescape_update_client[2];
+	gchar *runescape_config_dir, *installed_settings_file, *runescape_update_client[2];
 	gint i;
 	GError *error_spawn = NULL;
 
 	runescape_config_dir = g_build_filename(g_get_user_config_dir(), "runescape", NULL);
 	runescape_bin_dir = g_build_filename (runescape_config_dir, "bin", NULL);
-	runescape_settings_dir = g_build_filename (runescape_config_dir, "settings", NULL);
-
-	runescape_settings_file = g_build_filename (runescape_settings_dir, "settings.conf", NULL);
+	runescape_settings_file = g_build_filename (runescape_config_dir, "settings.conf", NULL);
 	appletviewer = g_build_filename (g_get_home_dir(), "jagexappletviewer.preferences", NULL);
 
 	if(debug)
-		g_fprintf(stdout, "Runescape config directory: %s\nRunescape bin directory: %s\nRunescape settings directory: %s\nRunescape settings file: %s\n\n", runescape_config_dir, runescape_bin_dir, runescape_settings_dir, runescape_settings_file);
+		g_fprintf(stdout, "Runescape config directory: %s\nRunescape bin directory: %s\nRunescape settings file: %s\n\n", runescape_config_dir, runescape_bin_dir, runescape_settings_file);
 
 	system_config_dirs = g_get_system_config_dirs ();
 	for (i = 0; system_config_dirs[i]; i++) {
