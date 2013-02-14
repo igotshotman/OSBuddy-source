@@ -1,6 +1,6 @@
 pkgname=runescape-client-git
 pkgbase=runescape-client
-pkgver=20130209
+pkgver=20130212
 pkgrel=1
 pkgdesc="Runescape Client for Linux"
 arch=(any)
@@ -29,9 +29,7 @@ build() {
 
 package() {
   cd "$srcdir/$pkgbase"
-  make runescape
-  make runescape-launcher
-  make runescape-update-client
+  make all
   make DESTDIR="$pkgdir" install
 }
 md5sums=()

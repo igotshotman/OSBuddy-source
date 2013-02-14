@@ -1,16 +1,19 @@
-#PREFIX ?= /opt/runescape
-#DEBUG = -g -pedantic
+CFLAGS = -Wall
+debug: CFLAGS += -O0 -g -pedantic -Wall -Wextra
+debug: all
 
 runescape: runescape.c
-	gcc runescape.c -o runescape -Wall `pkg-config --cflags --libs gtk+-3.0`
+	gcc runescape.c -o runescape ${CFLAGS} `pkg-config --cflags --libs gtk+-3.0`
 
 runescape-launcher: runescape-launcher.c
-	gcc runescape-launcher.c -o runescape-launcher -Wall `pkg-config --cflags --libs gtk+-3.0 webkitgtk-3.0`
+	gcc runescape-launcher.c -o runescape-launcher ${CFLAGS} `pkg-config --cflags --libs gtk+-3.0 webkitgtk-3.0`
 
 runescape-update-client: runescape-update-client.c
-	gcc runescape-update-client.c -o runescape-update-client -Wall `pkg-config --cflags --libs gtk+-3.0 libcurl`
+	gcc runescape-update-client.c -o runescape-update-client ${CFLAGS} `pkg-config --cflags --libs gtk+-3.0 libcurl`
 
-install:
+all: runescape runescape-launcher runescape-update-client
+
+install: all
 	mkdir -p $(DESTDIR)/etc/xdg/runescape/
 	mkdir -p $(DESTDIR)/usr/bin/
 	mkdir -p $(DESTDIR)/usr/share/applications/
