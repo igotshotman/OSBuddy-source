@@ -136,6 +136,7 @@ main(int argc, char *argv[]) {
 	GOptionContext *context;
 	FILE *ldd_output;
 	gchar *launchcommand, *java_binary, *ldd_command, opengl_fix[100], *ld_library_path;
+	gint java_type;
 	struct utsname my_uname;
 
 	context = g_option_context_new ("- launch the RuneScape Client");
@@ -157,7 +158,22 @@ main(int argc, char *argv[]) {
 	}
 
 	java_binary = g_find_program_in_path("java");
-	ldd_command = g_strjoin(" ", "ldd", java_binary, "| awk '/libjli.so/ {print $3}'", NULL);
+	if(g_file_test(java_binary, G_FILE_TEST_IS_SYMLINK) == TRUE) {
+		java_binary = g_file_read_link (java_binary, NULL);
+		if(g_strrstr(java_binary, "openjdk") != NULL) {
+			java_type = '1';
+		} else {
+			java_type = '0';
+		}
+	} else {
+		if(g_strrstr(java_binary, "openjdk") != NULL) {
+			java_type = '1';
+		} else {
+			java_type = '0';
+		}
+	}
+
+	ldd_command = g_strjoin(" ", "ldd", java_binary, "| awk '/libjli.so/ {print $3}' | sed 's/jli\\/libjli\\.so//'", NULL);
 	ldd_output = popen(ldd_command, "r");
 	if (ldd_output != NULL) {
 		fgets(opengl_fix, sizeof(opengl_fix), ldd_output);
@@ -182,7 +198,7 @@ main(int argc, char *argv[]) {
 	}
 
 	if(debug)
-		g_fprintf(stdout, "LD_LIBRARY_PATH: %sWorld :%s\nLanguage: %c\nRam: %s\nStacksize: %s\nPulseaudio: %s\nAlsa: %s\nJava binary: %s\n\n", opengl_fix, world, language[9], ram, stacksize, forcepulseaudio, forcealsa, java_binary);
+		g_fprintf(stdout, "Java binary: %s\nJava type: %c\nLD_LIBRARY_PATH: %sWorld :%s\nLanguage: %c\nRam: %s\nStacksize: %s\nPulseaudio: %s\nAlsa: %s\n\n", java_binary, java_type, opengl_fix, world, language[9], ram, stacksize, forcepulseaudio, forcealsa);
 
 	if(client_mode) {
 		launchcommand = g_strjoin(" ", java_binary, "-client", "-cp jagexappletviewer.jar", "-Djava.class.path=jagexappletviewer.jar", url, NULL);
@@ -193,7 +209,11 @@ main(int argc, char *argv[]) {
 		g_fprintf(stderr, "Can't use both alsa and pulseaudio! Please disable one or the other. Exiting.\n");
 		exit (EXIT_FAILURE);
 	} else if(g_strcmp0(forcealsa, "true") == 0 && g_strcmp0(forcepulseaudio, "false") == 0) {
-				launchcommand = g_strjoin(" ", launchcommand, "-Djavax.sound.sampled.Clip=com.sun.media.sound.DirectAudioDeviceProvider", "-Djavax.sound.sampled.Port=com.sun.media.sound.PortMixerProvider", "-Djavax.sound.sampled.SourceDataLine=com.sun.media.sound.DirectAudioDeviceProvider", "-Djavax.sound.sampled.TargetDataLine=com.sun.media.sound.DirectAudioDeviceProvider", NULL);
+		if (java_type == '1') {
+			launchcommand = g_strjoin(" ", launchcommand, "-Djavax.sound.sampled.Clip=com.sun.media.sound.DirectAudioDeviceProvider", "-Djavax.sound.sampled.Port=com.sun.media.sound.PortMixerProvider", "-Djavax.sound.sampled.SourceDataLine=com.sun.media.sound.DirectAudioDeviceProvider", "-Djavax.sound.sampled.TargetDataLine=com.sun.media.sound.DirectAudioDeviceProvider", NULL);
+		} else if(java_type == '0') {
+			launchcommand = g_strjoin(" ", "aoss", launchcommand, NULL);
+		}
 	} else if(g_strcmp0(forcealsa, "false") == 0 && g_strcmp0(forcepulseaudio, "true") == 0) {
 		launchcommand = g_strjoin(" ", "padsp", launchcommand, NULL);
 	}
@@ -213,7 +233,7 @@ main(int argc, char *argv[]) {
 		launchcommand = g_strjoin(" ", launchcommand, "-verbose:class", NULL);
 	launchcommand = g_strjoin(" ", launchcommand, "jagexappletviewer /share", NULL);
 
-	g_free(url);
+	/*g_free(url);
 	if(world)
 		g_free(world);
 	if(language)
@@ -224,15 +244,16 @@ main(int argc, char *argv[]) {
 	g_free(forcealsa);
 	g_free(java_binary);
 	if(ld_library_path)
-		g_free(ld_library_path);
+		g_free(ld_library_path);*/
 
 	if(debug) {
-		g_fprintf(stdout, "Launch command: %s\n\n", launchcommand);
+		g_fprintf(stdout, "Launch command:\n%s\n\n", launchcommand);
 		g_fprintf(stdout, "You are now in the hands of Jagex. Good luck on your RuneScape adventures!\n\n");
 	}
 
 	g_chdir(runescape_bin_dir);
 	system(launchcommand);
+	g_free(launchcommand);
 
 	return EXIT_SUCCESS;
 }
