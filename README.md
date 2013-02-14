@@ -56,7 +56,6 @@ To uninstall the RuneScape Client, simply run `make uninstall` (as root).
 		* code looks like it can be improved
 	* ~~implement skipping of commented lines, instead of making variable (null)~~
 		* again, code looks like it can be improved
-	* ~~proper language support (currently through runescape.prm) from jagexappletviewer.preferences~~
 	* ~~check which java is installed (openjdk/oracle)~~
 		* **Very** basic, needs more testing acros various distributios (32/64 bit as well)
 		* ~~implement aoss wrapper when java = oracle~~
@@ -65,18 +64,16 @@ To uninstall the RuneScape Client, simply run `make uninstall` (as root).
 		* see if there's a native C way of handling this
 	* ~~implement check for -client mode java~~
 	* When there is no jagexappletviewer.preferences, crash when g_free(language) - otherwise we're good
+	* If there is no config file (system wide or user specific), crash when g_free(forcepulseaudio || forcealsa)
 * runescape-update-client.c
-	* ~~"Update client" button should stay pressed when downloading~~
-	* ~~about dialog icon doesn't show~~
 	* ~~get rid of `popen` and `system`: replace with glib alternatives~~
 	* ~~actually, the whole `updatefromwindowsclient` function needs check for glib alternatives~~
 		* there are none; at least definetely not for popen and fgets. system and strlen do just what we need, instead of the more complicated g_spawn_sync and g_strlcpy 
 	* ~~when cancel button is clicked during download, cancel the download (and close the window)~~
-	* ~~at `res != CURLE_OK`: exit when press OK on error dialog -> remove exit(EXIT_FAILURE)~~
-		* implemented exit(EXIT_FAILURE) everywhere, the other functions were off. this is proper behaviour
 	* ~~before downloading `runescape.msi`, check if it is the complete file;~~
 		* ~~if not, remove it and start download;~~
 		* ~~else, skip download (already implemented)~~
+			* for now, size is statically set. we should check total size before download, in case filesize changes
 
 ## Bugs
 Should you find any (they are there), please report them to me either by email (see the source files) or open a new Issue on the GitHub page.

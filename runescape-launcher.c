@@ -3,12 +3,12 @@
  * runescape-launcher.c
  * Copyright (C) 2013 Jente <jthidskes@outlook.com>
  *
- * runescape-launcher is free software: you can redistribute it and/or modify it
+ * runescape-launcher.c is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * runescape-launcher is distributed in the hope that it will be useful, but
+ * runescape-launcher.c is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
@@ -65,7 +65,7 @@ static void
 dialog_open ()
 {
 	GtkWidget *about_dialog;
-
+	gchar *license_trans;
 	const gchar *authors[] = {"Unia (Jente)", "HikariKnight", NULL};
 	const gchar *license[] = {
 		N_("The RuneScape Client is free software: you can redistribute it and/or modify "
@@ -78,9 +78,8 @@ dialog_open ()
 		   "GNU General Public License for more details."),
 		N_("You should have received a copy of the GNU General Public License "
 		   "along with this program. If not, see <http://www.gnu.org/licenses/>.")
-};
+	};
 
-	gchar *license_trans;
 	license_trans = g_strjoin ("\n\n", _(license[0]), _(license[1]), _(license[2]), NULL);
 
 	about_dialog = gtk_about_dialog_new ();

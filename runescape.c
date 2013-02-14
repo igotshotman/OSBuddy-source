@@ -50,8 +50,8 @@ gchar *runescape_bin_dir, *runescape_settings_file, *appletviewer;
 gchar *url;
 gchar *world;
 gchar *language;
-gchar *ram = "-Xmx1024m";
-gchar *stacksize= "-Xss1m";
+gchar *ram;
+gchar *stacksize;
 gchar *forcepulseaudio = "false";
 gchar *forcealsa = "false";
 
@@ -238,11 +238,14 @@ main(int argc, char *argv[]) {
 		g_free(world);
 	/*if(language)
 		g_free(language);*/
-	g_free(ram);
-	g_free(stacksize);
-	g_free(forcepulseaudio);
-	g_free(forcealsa);
-	g_free(java_binary);
+	if(ram)
+		g_free(ram);
+	if(stacksize)
+		g_free(stacksize);
+	/*g_free(forcepulseaudio);
+	g_free(forcealsa);*/
+	if(java_binary)
+		g_free(java_binary);
 	if(ld_library_path)
 		g_free(ld_library_path);
 
