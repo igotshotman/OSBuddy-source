@@ -49,7 +49,7 @@ static GOptionEntry entries[] =
 gchar *runescape_bin_dir, *runescape_settings_file, *appletviewer;
 gchar *url;
 gchar *world;
-gchar *language = NULL;
+gchar *language;
 gchar *ram = "-Xmx1024m";
 gchar *stacksize= "-Xss1m";
 gchar *forcepulseaudio = "false";
@@ -233,18 +233,18 @@ main(int argc, char *argv[]) {
 		launchcommand = g_strjoin(" ", launchcommand, "-verbose:class", NULL);
 	launchcommand = g_strjoin(" ", launchcommand, "jagexappletviewer /share", NULL);
 
-	/*g_free(url);
+	g_free(url);
 	if(world)
 		g_free(world);
-	if(language)
-		g_free(language);
+	/*if(language)
+		g_free(language);*/
 	g_free(ram);
 	g_free(stacksize);
 	g_free(forcepulseaudio);
 	g_free(forcealsa);
 	g_free(java_binary);
 	if(ld_library_path)
-		g_free(ld_library_path);*/
+		g_free(ld_library_path);
 
 	if(debug) {
 		g_fprintf(stdout, "Launch command:\n%s\n\n", launchcommand);
