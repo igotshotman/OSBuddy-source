@@ -1,5 +1,5 @@
 CFLAGS = -Wall
-debug: CFLAGS += -O0 -g -pedantic -Wall -Wextra
+debug: CFLAGS += -O0 -g -pedantic -Wextra
 debug: all
 
 runescape: runescape.c
