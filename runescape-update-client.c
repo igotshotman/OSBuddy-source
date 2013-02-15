@@ -30,9 +30,9 @@
 
 enum
 {
-  DL_NONE,
-  DL_PROGRESS,
-  DL_ABORT
+	DL_NONE,
+	DL_PROGRESS,
+	DL_ABORT
 };
 
 static gboolean debug = FALSE;
@@ -60,9 +60,8 @@ getdirs()
 		if (error_config_dir) {
 			g_mkdir_with_parents(runescape_config_dir, 0755);
 			g_error_free(error_config_dir);
-		} else {
+		} else
 			g_dir_close(config2);
-		}
 	} else {
 		error_dialog = gtk_message_dialog_new ((GtkWindow *)window, GTK_DIALOG_DESTROY_WITH_PARENT,
 												GTK_MESSAGE_ERROR,
@@ -78,9 +77,8 @@ getdirs()
 	if(error_bin_dir) {
 		g_mkdir_with_parents(runescape_bin_dir, 0755);
 		g_error_free(error_bin_dir);
-	} else {
+	} else
 		g_dir_close(bindir2);
-	}
 
 	if(debug) {
 		g_fprintf(stdout, "Runescape config directory: %s\n", runescape_config_dir);
@@ -135,9 +133,9 @@ downloadwindowsclient()
 		res = curl_easy_perform(curl);
 
 		if(res != CURLE_OK) {
-			if(dl_state == DL_ABORT) {
+			if(dl_state == DL_ABORT)
 				exit(EXIT_SUCCESS);
-			} else {
+			else {
 				if(debug)
 					g_fprintf(stderr, "curl_easy_perform() failed: %s\n\n", curl_easy_strerror(res));
 				error_dialog = gtk_message_dialog_new ((GtkWindow *)window, GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -163,25 +161,21 @@ checkwindowsclient()
 	gint size;
     
 	if(g_file_test ("runescape.msi", G_FILE_TEST_EXISTS) == TRUE ) {
-		if(debug) {
+		if(debug)
 			g_fprintf(stdout, "Found runescape.msi, checking size...\n");
-		}
 		stat("runescape.msi", &st);
 		size = st.st_size;
 		if(size != 23642112) {
-			if(debug) {
+			if(debug)
 				g_fprintf(stdout, "File is not complete, so we will remove it and download it again\n\n");
-			}
 			downloadwindowsclient();
 		} else {
-			if(debug) {
+			if(debug)
 				g_fprintf(stdout, "File is complete, so we will skip the download\n\n");
-			}
 		}
 	} else {
-		if(debug) {
+		if(debug)
 			g_fprintf(stdout, "Did not find runescape.msi, so we will download it now\n\n");
-		}
 		downloadwindowsclient();
 	}
 }
