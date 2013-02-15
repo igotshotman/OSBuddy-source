@@ -63,8 +63,8 @@ To uninstall the RuneScape Client, simply run `make uninstall` (as root).
 	* ~~implement opengl fix~~
 		* see if there's a native C way of handling this
 	* ~~implement check for -client mode java~~
-	* When there is no jagexappletviewer.preferences, crash when g_free(language) - otherwise we're good
-	* If there is no config file (system wide or user specific), crash when g_free(forcepulseaudio || forcealsa)
+	* ~~When there is no jagexappletviewer.preferences, crash when g_free(language) - otherwise we're good~~
+	* ~~If there is no config file (system wide or user specific), crash when g_free(forcepulseaudio || forcealsa)~~
 * runescape-update-client.c
 	* ~~get rid of `popen` and `system`: replace with glib alternatives~~
 	* ~~actually, the whole `updatefromwindowsclient` function needs check for glib alternatives~~

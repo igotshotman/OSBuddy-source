@@ -47,13 +47,7 @@ static GOptionEntry entries[] =
 };
 
 gchar *runescape_bin_dir, *runescape_settings_file, *appletviewer;
-gchar *url;
-gchar *world;
-gchar *language;
-gchar *ram;
-gchar *stacksize;
-gchar *forcepulseaudio = "false";
-gchar *forcealsa = "false";
+gchar *url, *world, *language, *ram, *stacksize, *forcepulseaudio = "false", *forcealsa = "false";
 
 void
 setupfiles(void) {
@@ -118,9 +112,9 @@ parsesettingsfile(gchar *runescape_settings_file) {
 	GKeyFile *settings;
 
 	settings = g_key_file_new();
-	if(g_key_file_load_from_file (settings, runescape_settings_file, G_KEY_FILE_NONE, NULL) == FALSE) {
+	if(g_key_file_load_from_file (settings, runescape_settings_file, G_KEY_FILE_NONE, NULL) == FALSE)
 		g_fprintf(stderr, "Unable to read any settings.conf file. Please check if the RuneScape Client is installed properly. Falling back to defaults.\n\n");
-	} else {
+	else {
 		world = g_key_file_get_string (settings, "Runescape", "world", NULL);
 		ram = g_key_file_get_string (settings, "Java", "ram", NULL);
 		stacksize = g_key_file_get_string (settings, "Java", "stacksize", NULL);
@@ -151,26 +145,23 @@ main(int argc, char *argv[]) {
 	parselanguage(appletviewer);
 	parsesettingsfile(runescape_settings_file);
 
-	if(world) {
+	if(world)
 		url = g_strdup_printf("-Dcom.jagex.config=http://%s.runescape.com/k=3/l=%c/jav_config.ws", world, language[9]);
-	} else {
+	else
 		url = g_strdup_printf("-Dcom.jagex.config=http://www.runescape.com/k=3/l=%c/jav_config.ws", language[9]);
-	}
 
 	java_binary = g_find_program_in_path("java");
 	if(g_file_test(java_binary, G_FILE_TEST_IS_SYMLINK) == TRUE) {
 		java_binary = g_file_read_link (java_binary, NULL);
-		if(g_strrstr(java_binary, "openjdk") != NULL) {
+		if(g_strrstr(java_binary, "openjdk") != NULL)
 			java_type = '1';
-		} else {
+		else
 			java_type = '0';
-		}
 	} else {
-		if(g_strrstr(java_binary, "openjdk") != NULL) {
+		if(g_strrstr(java_binary, "openjdk") != NULL)
 			java_type = '1';
-		} else {
+		else
 			java_type = '0';
-		}
 	}
 
 	ldd_command = g_strjoin(" ", "ldd", java_binary, "| awk '/libjli.so/ {print $3}' | sed 's/jli\\/libjli\\.so//'", NULL);
@@ -179,9 +170,8 @@ main(int argc, char *argv[]) {
 		fgets(opengl_fix, sizeof(opengl_fix), ldd_output);
 		pclose(ldd_output);
 		ld_library_path = g_strjoin("", "LD_LIBRARY_PATH=", opengl_fix, NULL);
-	} else {
+	} else
 		g_fprintf(stderr, "Could not retrieve the path to libjli.so: Java will run without OpenGL implementation\n\n");
-	}
 
 	if(uname(&my_uname) == -1) {
 		if(debug)
@@ -198,25 +188,22 @@ main(int argc, char *argv[]) {
 	}
 
 	if(debug)
-		g_fprintf(stdout, "Java binary: %s\nJava type: %c\nLD_LIBRARY_PATH: %sWorld :%s\nLanguage: %c\nRam: %s\nStacksize: %s\nPulseaudio: %s\nAlsa: %s\n\n", java_binary, java_type, opengl_fix, world, language[9], ram, stacksize, forcepulseaudio, forcealsa);
+		g_fprintf(stdout, "Java binary: %s\nJava type: %c\nLD_LIBRARY_PATH: %sWorld: %s\nLanguage: %c\nRam: %s\nStacksize: %s\nPulseaudio: %s\nAlsa: %s\n\n", java_binary, java_type, opengl_fix, world, language[9], ram, stacksize, forcepulseaudio, forcealsa);
 
-	if(client_mode) {
+	if(client_mode)
 		launchcommand = g_strjoin(" ", java_binary, "-client", "-cp jagexappletviewer.jar", "-Djava.class.path=jagexappletviewer.jar", url, NULL);
-	} else {
+	else
 		launchcommand = g_strjoin(" ", java_binary, "-cp jagexappletviewer.jar", "-Djava.class.path=jagexappletviewer.jar", url, NULL);
-	}
 	if(g_strcmp0(forcepulseaudio, "true") == 0 && g_strcmp0(forcealsa, "true") == 0) {
 		g_fprintf(stderr, "Can't use both alsa and pulseaudio! Please disable one or the other. Exiting.\n");
 		exit (EXIT_FAILURE);
 	} else if(g_strcmp0(forcealsa, "true") == 0 && g_strcmp0(forcepulseaudio, "false") == 0) {
-		if (java_type == '1') {
+		if (java_type == '1')
 			launchcommand = g_strjoin(" ", launchcommand, "-Djavax.sound.sampled.Clip=com.sun.media.sound.DirectAudioDeviceProvider", "-Djavax.sound.sampled.Port=com.sun.media.sound.PortMixerProvider", "-Djavax.sound.sampled.SourceDataLine=com.sun.media.sound.DirectAudioDeviceProvider", "-Djavax.sound.sampled.TargetDataLine=com.sun.media.sound.DirectAudioDeviceProvider", NULL);
-		} else if(java_type == '0') {
+		else if(java_type == '0')
 			launchcommand = g_strjoin(" ", "aoss", launchcommand, NULL);
-		}
-	} else if(g_strcmp0(forcealsa, "false") == 0 && g_strcmp0(forcepulseaudio, "true") == 0) {
+	} else if(g_strcmp0(forcealsa, "false") == 0 && g_strcmp0(forcepulseaudio, "true") == 0)
 		launchcommand = g_strjoin(" ", "padsp", launchcommand, NULL);
-	}
 	if(ld_library_path)
 		launchcommand = g_strjoin(" ", ld_library_path, launchcommand, NULL);
 	launchcommand = g_strjoin(" ", launchcommand, ram, NULL);
@@ -236,14 +223,16 @@ main(int argc, char *argv[]) {
 	g_free(url);
 	if(world)
 		g_free(world);
-	/*if(language)
-		g_free(language);*/
+	if(g_file_test (appletviewer, G_FILE_TEST_EXISTS) == TRUE)
+		g_free(language);
 	if(ram)
 		g_free(ram);
 	if(stacksize)
 		g_free(stacksize);
-	/*g_free(forcepulseaudio);
-	g_free(forcealsa);*/
+	if(g_file_test (runescape_settings_file, G_FILE_TEST_EXISTS) == TRUE) {
+		g_free(forcepulseaudio);
+		g_free(forcealsa);
+	}
 	if(java_binary)
 		g_free(java_binary);
 	if(ld_library_path)
