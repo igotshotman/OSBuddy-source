@@ -206,8 +206,10 @@ main(int argc, char *argv[]) {
 		launchcommand = g_strjoin(" ", "padsp", launchcommand, NULL);
 	if(ld_library_path)
 		launchcommand = g_strjoin(" ", ld_library_path, launchcommand, NULL);
-	launchcommand = g_strjoin(" ", launchcommand, ram, NULL);
-	launchcommand = g_strjoin(" ", launchcommand, stacksize, NULL);
+	if(ram)
+		launchcommand = g_strjoin(" ", launchcommand, ram, NULL);
+	if(stacksize)
+		launchcommand = g_strjoin(" ", launchcommand, stacksize, NULL);
 	if(debug)
 		launchcommand = g_strjoin(" ", launchcommand, "-Xdebug", NULL);
 	if(verbose)
