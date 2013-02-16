@@ -6,8 +6,9 @@ pkgdesc="Runescape Client for Linux"
 arch=(any)
 url="https://github.com/Unia/runescape-client"
 license=(GPL2)
-depends=('java-runtime' 'curl' 'perl' 'p7zip' 'gtk3' 'webkitgtk3')
-optdepends=()
+depends=('java-runtime' 'curl' 'p7zip' 'gtk3' 'webkitgtk3')
+optdepends=('pulseaudio: have sound played through pulseaudio'
+			'alsa-oss: have sound played through alsa')
 conflicts=('runescape-client-bin' 'unix-runescape-client')
 
 _gitroot="https://github.com/Unia/runescape-client"
