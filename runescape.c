@@ -48,6 +48,7 @@ static GOptionEntry entries[] =
 
 gchar *runescape_bin_dir, *runescape_settings_file, *appletviewer;
 gchar *url, *world, *language, *ram, *stacksize, *forcepulseaudio = "false", *forcealsa = "false";
+gchar *httpph = NULL, *httppp = NULL, *httpsph = NULL, *httpspp = NULL, *sph = NULL, *spp = NULL;
 
 void
 setupfiles(void) {
@@ -120,6 +121,14 @@ parsesettingsfile(gchar *runescape_settings_file) {
 		stacksize = g_key_file_get_string (settings, "Java", "stacksize", NULL);
 		forcepulseaudio = g_key_file_get_string (settings, "Fixes", "forcepulseaudio", NULL);
 		forcealsa = g_key_file_get_string (settings, "Fixes", "forcealsa", NULL);
+		if(g_key_file_has_group (settings, "Proxy") == TRUE) {
+			httpph = g_key_file_get_string (settings, "Proxy", "httpph", NULL);
+			httppp = g_key_file_get_string (settings, "Proxy", "httppp", NULL);
+			httpsph = g_key_file_get_string (settings, "Proxy", "httpsph", NULL);
+			httpspp = g_key_file_get_string (settings, "Proxy", "httpspp", NULL);
+			sph = g_key_file_get_string (settings, "Proxy", "sph", NULL);
+			spp = g_key_file_get_string (settings, "Proxy", "spp", NULL);
+		}
 		g_key_file_free(settings);
 	}
 }
@@ -188,8 +197,13 @@ main(int argc, char *argv[]) {
 		}
 	}
 
-	if(debug)
+	if(debug) {
 		g_fprintf(stdout, "Java binary: %s\nJava type: %c\nLD_LIBRARY_PATH: %sWorld: %s\nLanguage: %c\nRam: %s\nStacksize: %s\nPulseaudio: %s\nAlsa: %s\n\n", java_binary, java_type, opengl_fix, world, language[9], ram, stacksize, forcepulseaudio, forcealsa);
+		if(httpph && httppp && httpsph && httpspp)
+			g_fprintf(stdout, "httpph: %s\nhttppp: %s\nhttpsph: %s\nhttpspp: %s\n\n", httpph, httppp, httpsph, httpspp);
+		if(sph && spp)
+			g_fprintf(stdout, "sph: %s\nspp: %s\n\n", sph, spp);
+	}
 
 	if(client_mode)
 		launchcommand = g_strjoin(" ", java_binary, "-client", "-cp jagexappletviewer.jar", url, NULL);
@@ -211,6 +225,10 @@ main(int argc, char *argv[]) {
 		launchcommand = g_strjoin(" ", launchcommand, ram, NULL);
 	if(stacksize)
 		launchcommand = g_strjoin(" ", launchcommand, stacksize, NULL);
+	if(httpph && httppp && httpsph && httpspp)
+		launchcommand = g_strjoin(" ", launchcommand, httpph, httppp, httpsph, httpspp, NULL);
+	if(sph && spp)
+		launchcommand = g_strjoin(" ", launchcommand, sph, spp, NULL);
 	if(debug)
 		launchcommand = g_strjoin(" ", launchcommand, "-Xdebug", NULL);
 	if(verbose)
@@ -236,6 +254,18 @@ main(int argc, char *argv[]) {
 		g_free(forcepulseaudio);
 		g_free(forcealsa);
 	}
+	if(httpph)
+		g_free(httpph);
+	if(httppp)
+		g_free(httppp);
+	if(httpsph)
+		g_free(httpsph);
+	if(httpspp)
+		g_free(httpspp);
+	if(sph)
+		g_free(sph);
+	if(spp)
+		g_free(spp);
 	if(java_binary)
 		g_free(java_binary);
 	if(ld_library_path)
