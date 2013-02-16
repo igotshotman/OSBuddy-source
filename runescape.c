@@ -169,6 +169,7 @@ main(int argc, char *argv[]) {
 	if (ldd_output != NULL) {
 		fgets(opengl_fix, sizeof(opengl_fix), ldd_output);
 		pclose(ldd_output);
+		opengl_fix[strlen(opengl_fix)-1] = '\0';
 		ld_library_path = g_strjoin("", "LD_LIBRARY_PATH=", opengl_fix, NULL);
 	} else
 		g_fprintf(stderr, "Could not retrieve the path to libjli.so: Java will run without OpenGL implementation\n\n");
@@ -191,9 +192,9 @@ main(int argc, char *argv[]) {
 		g_fprintf(stdout, "Java binary: %s\nJava type: %c\nLD_LIBRARY_PATH: %sWorld: %s\nLanguage: %c\nRam: %s\nStacksize: %s\nPulseaudio: %s\nAlsa: %s\n\n", java_binary, java_type, opengl_fix, world, language[9], ram, stacksize, forcepulseaudio, forcealsa);
 
 	if(client_mode)
-		launchcommand = g_strjoin(" ", java_binary, "-client", "-cp jagexappletviewer.jar", "-Djava.class.path=jagexappletviewer.jar", url, NULL);
+		launchcommand = g_strjoin(" ", java_binary, "-client", "-cp jagexappletviewer.jar", url, NULL);
 	else
-		launchcommand = g_strjoin(" ", java_binary, "-cp jagexappletviewer.jar", "-Djava.class.path=jagexappletviewer.jar", url, NULL);
+		launchcommand = g_strjoin(" ", java_binary, "-cp jagexappletviewer.jar", url, NULL);
 	if(g_strcmp0(forcepulseaudio, "true") == 0 && g_strcmp0(forcealsa, "true") == 0) {
 		g_fprintf(stderr, "Can't use both alsa and pulseaudio! Please disable one or the other. Exiting.\n");
 		exit (EXIT_FAILURE);
