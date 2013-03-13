@@ -1,16 +1,21 @@
+RuneScape Client for Linux
+=========
+
 ## Introduction
 
 The RuneScape Client for Linux is written to provide Linux users with a simple way to play RuneScape and 
 update the Client through a simple and familiar interface (GTK).
 
 It is based on HikariKnight's RuneScape For Unix, which is a set of perl scripts bundled with Wx. I simply
-wanted to rewrite his scripts in C and use a more common widget set for the interface (And it was a nice way
+wanted to rewrite his scripts in C and use a more common widget set for the interface (and it was a nice way
 to practice my programming in C).
 
 ~~Currently, I am in the process of converting the runescape perl script and all its modules to C. Progress is slow
 since my experience with C is beginner at best, so all original perl script will still be provided.~~
 
-The "RuneScape" perl script is written by HikariKnight, but is based on Ethoxyethaan's shellscript to run the RuneScape Windows client natively. For more information, see HikariKnight's website: http://hkprojects.weebly.com
+The "RuneScape" perl script is written by HikariKnight, but is based on Ethoxyethaan's shellscript to run the RuneScape Windows client natively. For more information, see HikariKnight's [website][site].
+
+[site]: http://hkprojects.weebly.com
 
 RuneScape is a registred trademark of Jagex Inc.
 
@@ -47,7 +52,10 @@ To uninstall the RuneScape Client, simply run `make uninstall` (as root).
 
 ## Usage
 A small word on the usage, just so you can get the maximum out of the client. When installed, you can run either of three applications as you
-would normally run any application. 
+would normally run any application. A configuration file is installed in `/etc/xdg/runescape`. You can copy it to `XDG_CONFIG_HOME` (usually `~/.config/`) and edit it to change the behaviour of the client.
+
+	$ mkdir -p ~/.config/runescape
+	$ cp /etc/xdg/runescape/settings.conf ~/.config/runescape/settings.conf
 
 ## ToDo
 * improve makefile
@@ -67,4 +75,7 @@ would normally run any application.
 	* for now, download size is statically set. we should check total size before download, in case filesize changes
 
 ## Bugs
-Should you find any, please report them to me either by email (see the source files) or open a new Issue on the GitHub page.
+Should you find any, please report them to me either by email (see the source files) or [open a new Issue][issue] on the [GitHub page][ghp].
+
+[issue]: https://github.com/Unia/runescape-client/issues 
+[ghp]: https://github.com/Unia/runescape-client/
