@@ -1,6 +1,6 @@
 pkgname=runescape-client-git
 pkgbase=runescape-client
-pkgver=20130212
+pkgver=20130305
 pkgrel=1
 pkgdesc="Runescape Client for Linux"
 arch=(any)

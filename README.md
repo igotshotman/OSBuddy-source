@@ -4,11 +4,11 @@ The RuneScape Client for Linux is written to provide Linux users with a simple w
 update the Client through a simple and familiar interface (GTK).
 
 It is based on HikariKnight's RuneScape For Unix, which is a set of perl scripts bundled with Wx. I simply
-wanted to rewrite his scripts in C and use a more common widget set for the interface. (And it was a nice way
-to practice my programming in C, which is beginner at best).
+wanted to rewrite his scripts in C and use a more common widget set for the interface (And it was a nice way
+to practice my programming in C).
 
-Currently, I am in the process of converting the runescape perl script and all its modules to C. Progress is slow
-since my experience with C is beginner at best, so all original perl script will still be provided.
+~~Currently, I am in the process of converting the runescape perl script and all its modules to C. Progress is slow
+since my experience with C is beginner at best, so all original perl script will still be provided.~~
 
 The "RuneScape" perl script is written by HikariKnight, but is based on Ethoxyethaan's shellscript to run the RuneScape Windows client natively. For more information, see HikariKnight's website: http://hkprojects.weebly.com
 
@@ -38,15 +38,16 @@ On rpm-based distributions such as Fedora, you will need these:
 
 When all dependencies are installed, simply run the following commands to install every component:
 
-`make runescape`
-
-`make runescape-launcher`
-
-`make runescape-update-client`
-
-`make install` (as root)
+	$ make runescape
+	$ make runescape-launcher
+	$ make runescape-update-client
+	# make clean install
 
 To uninstall the RuneScape Client, simply run `make uninstall` (as root).
+
+## Usage
+A small word on the usage, just so you can get the maximum out of the client. When installed, you can run either of three applications as you
+would normally run any application. 
 
 ## ToDo
 * improve makefile
@@ -62,18 +63,8 @@ To uninstall the RuneScape Client, simply run `make uninstall` (as root).
 			* Some distributions use aoss32; not implemented yet. Needs the testing mentioned above.
 	* ~~implement opengl fix~~
 		* see if there's a native C way of handling this
-	* ~~implement check for -client mode java~~
-	* ~~When there is no jagexappletviewer.preferences, crash when g_free(language) - otherwise we're good~~
-	* ~~If there is no config file (system wide or user specific), crash when g_free(forcepulseaudio || forcealsa)~~
 * runescape-update-client.c
-	* ~~get rid of `popen` and `system`: replace with glib alternatives~~
-	* ~~actually, the whole `updatefromwindowsclient` function needs check for glib alternatives~~
-		* there are none; at least definetely not for popen and fgets. system and strlen do just what we need, instead of the more complicated g_spawn_sync and g_strlcpy 
-	* ~~when cancel button is clicked during download, cancel the download (and close the window)~~
-	* ~~before downloading `runescape.msi`, check if it is the complete file;~~
-		* ~~if not, remove it and start download;~~
-		* ~~else, skip download (already implemented)~~
-			* for now, size is statically set. we should check total size before download, in case filesize changes
+	* for now, download size is statically set. we should check total size before download, in case filesize changes
 
 ## Bugs
-Should you find any (they are there), please report them to me either by email (see the source files) or open a new Issue on the GitHub page.
+Should you find any, please report them to me either by email (see the source files) or open a new Issue on the GitHub page.
