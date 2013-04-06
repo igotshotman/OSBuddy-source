@@ -36,8 +36,7 @@ static gboolean gc = FALSE;
 static gboolean class = FALSE;
 static gboolean client_mode = FALSE;
 
-static GOptionEntry entries[] =
-{
+static GOptionEntry entries[] = {
 	{ "debug", 'd', 0, G_OPTION_ARG_NONE, &debug, "Turn on debug information", NULL },
 	{ "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Turn on all Java verbose output, equals all of the below combined", NULL },
 	{ "verbose:jni", 'j', 0, G_OPTION_ARG_NONE, &jni, "Java: report information about use of native methods and other Java Native Interface activity", NULL },
@@ -47,11 +46,10 @@ static GOptionEntry entries[] =
 };
 
 gchar *runescape_bin_dir, *runescape_settings_file, *appletviewer;
-gchar *url, *world, *language, *ram, *stacksize, *forcepulseaudio = "false", *forcealsa = "false";
+gchar *url, *world, *rsfilesdir, *language, *ram, *stacksize, *forcepulseaudio = "false", *forcealsa = "false";
 gchar *httpph = NULL, *httppp = NULL, *httpsph = NULL, *httpspp = NULL, *sph = NULL, *spp = NULL;
 
-void
-setupfiles(void) {
+void setupfiles(void) {
 	const gchar *system_config_dir;
 	const gchar* const *system_config_dirs;
 	gchar *runescape_config_dir, *installed_settings_file, *runescape_update_client[2];
@@ -100,16 +98,14 @@ setupfiles(void) {
 	}
 }
 
-void
-parselanguage(gchar *appletviewer) {
+void parselanguage(gchar *appletviewer) {
 	if(g_file_get_contents(appletviewer, &language, NULL, NULL) == FALSE) {
 		g_fprintf(stderr, "Unable to read file: %s. Falling back to English.\n", appletviewer);
 		language = "Language=0";
 	}
 }
 
-void
-parsesettingsfile(gchar *runescape_settings_file) {
+void parsesettingsfile(gchar *runescape_settings_file) {
 	GKeyFile *settings;
 
 	settings = g_key_file_new();
@@ -117,6 +113,7 @@ parsesettingsfile(gchar *runescape_settings_file) {
 		g_fprintf(stderr, "Unable to read any settings.conf file. Please check if the RuneScape Client is installed properly. Falling back to defaults.\n\n");
 	else {
 		world = g_key_file_get_string (settings, "Runescape", "world", NULL);
+		rsfilesdir = g_key_file_get_string (settings, "Runescape", "rsfilesdir", NULL);
 		ram = g_key_file_get_string (settings, "Java", "ram", NULL);
 		stacksize = g_key_file_get_string (settings, "Java", "stacksize", NULL);
 		forcepulseaudio = g_key_file_get_string (settings, "Fixes", "forcepulseaudio", NULL);
@@ -133,8 +130,7 @@ parsesettingsfile(gchar *runescape_settings_file) {
 	}
 }
 
-int
-main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
 	GError *error_parsearg = NULL;
 	GOptionContext *context;
 	FILE *ldd_output;
@@ -221,6 +217,8 @@ main(int argc, char *argv[]) {
 		launchcommand = g_strjoin(" ", "padsp", launchcommand, NULL);
 	if(ld_library_path)
 		launchcommand = g_strjoin(" ", ld_library_path, launchcommand, NULL);
+	if(rsfilesdir)
+		launchcommand = g_strjoin(" ", java_binary, rsfilesdir, NULL);
 	if(ram)
 		launchcommand = g_strjoin(" ", launchcommand, ram, NULL);
 	if(stacksize)
@@ -244,6 +242,8 @@ main(int argc, char *argv[]) {
 	g_free(url);
 	if(world)
 		g_free(world);
+	if(rsfilesdir)
+		g_free(rsfilesdir);
 	if(g_file_test (appletviewer, G_FILE_TEST_EXISTS) == TRUE)
 		g_free(language);
 	if(ram)

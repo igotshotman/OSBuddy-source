@@ -1,6 +1,6 @@
 CFLAGS = -Wall
-debug: CFLAGS += -O0 -g -pedantic -Wextra
-debug: all
+#debug: CFLAGS += -O0 -g -pedantic -Wextra
+#debug: all
 
 runescape: runescape.c
 	gcc runescape.c -o runescape ${CFLAGS} `pkg-config --cflags --libs gtk+-3.0`

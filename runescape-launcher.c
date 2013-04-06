@@ -27,15 +27,12 @@
 
 static gboolean debug = FALSE;
 
-static GOptionEntry entries[] =
-{
+static GOptionEntry entries[] = {
 	{ "debug", 'd', 0, G_OPTION_ARG_NONE, &debug, "Turn on debug information", NULL },
 	{ NULL }
 };
 
-static void
-launch_client (GtkButton* button)
-{
+static void launch_client (void) {
 	gchar *runescape_launch;
 
 	runescape_launch = g_find_program_in_path("runescape");
@@ -44,9 +41,7 @@ launch_client (GtkButton* button)
 	execl(runescape_launch, runescape_launch, NULL);
 }
 
-static void
-update_client (GtkButton* button)
-{
+static void update_client (void) {
 	gchar *runescape_update;
 
 	runescape_update = g_find_program_in_path("runescape-update-client");
@@ -55,15 +50,11 @@ update_client (GtkButton* button)
 	execl(runescape_update, runescape_update, NULL);
 }
 
-static void
-dialog_close (GtkWidget *about_dialog)
-{
+static void dialog_close (GtkWidget *about_dialog) {
 	gtk_widget_destroy (GTK_WIDGET (about_dialog));
 }
 
-static void
-dialog_open ()
-{
+static void dialog_open (void) {
 	GtkWidget *about_dialog;
 	gchar *license_trans;
 	const gchar *authors[] = {"Unia (Jente)", "HikariKnight", NULL};
@@ -98,9 +89,7 @@ dialog_open ()
 	gtk_widget_show (about_dialog);
 }
 
-static GtkWidget*
-create_window (void)
-{
+static GtkWidget* create_window (void) {
 	GtkWidget *window, *box_all, *box_scroll, *box_button, *button_play, *button_update, *button_about, *scroll, *view;
 
 	/* Set up the UI */
@@ -156,9 +145,7 @@ create_window (void)
 	return window;
 }
 
-int
-main (int argc, char *argv[])
-{
+int main (int argc, char *argv[]) {
  	GtkWidget *window;
 	GError *error_parsearg = NULL;
 	GOptionContext *context;
@@ -166,8 +153,7 @@ main (int argc, char *argv[])
 	context = g_option_context_new ("- a launcher to the RuneScape applications");
 	g_option_context_add_main_entries (context, entries, NULL);
 	g_option_context_add_group (context, gtk_get_option_group (TRUE));
-	if (!g_option_context_parse (context, &argc, &argv, &error_parsearg))
-	{
+	if (!g_option_context_parse (context, &argc, &argv, &error_parsearg)) {
 		g_fprintf (stderr, "%s\n", error_parsearg->message);
 		exit (EXIT_FAILURE);
 	}

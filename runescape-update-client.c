@@ -28,8 +28,7 @@
 #include <sys/stat.h> /*stat*/
 #include <curl/curl.h>
 
-enum
-{
+enum {
 	DL_NONE,
 	DL_PROGRESS,
 	DL_ABORT
@@ -38,8 +37,7 @@ enum
 static gboolean debug = FALSE;
 static int dl_state = DL_NONE;
 
-static GOptionEntry entries[] =
-{
+static GOptionEntry entries[] = {
 	{ "debug", 'd', 0, G_OPTION_ARG_NONE, &debug, "Turn on debug information", NULL },
 	{ NULL }
 };
@@ -48,9 +46,7 @@ GtkWidget *window, *progressbar, *button_update;
 GError *error_parsearg = NULL, *error_config_dir = NULL, *error_bin_dir = NULL;
 gchar *runescape_config_dir, *runescape_bin_dir;
 
-void
-getdirs()
-{
+void getdirs(void) {
 	GDir *config2, *bindir2;
 	GtkWidget *error_dialog;
 
@@ -86,16 +82,13 @@ getdirs()
 	}
 }
 
-size_t write_data(void *ptr, size_t size, size_t nmemb, FILE *stream)
-{
+size_t write_data(void *ptr, size_t size, size_t nmemb, FILE *stream) {
 	size_t written;
 	written = fwrite(ptr, size, nmemb, stream);
 	return written;
 }
 
-static int
-update_progressbar(GtkWidget *progressbar, double dltotal, double dlnow)
-{
+static int update_progressbar(GtkWidget *progressbar, double dltotal, double dlnow) {
 	double fraction;
 	fraction = dlnow / dltotal;
 
@@ -108,9 +101,7 @@ update_progressbar(GtkWidget *progressbar, double dltotal, double dlnow)
 	return 0;
 }
 
-void
-downloadwindowsclient()
-{
+void downloadwindowsclient(void) {
 	CURL *curl;
 	FILE *fp;
 	CURLcode res;
@@ -154,12 +145,10 @@ downloadwindowsclient()
 	}
 }
 
-void
-checkwindowsclient()
-{
+void checkwindowsclient(void) {
 	struct stat st;
 	gint size;
-    
+
 	if(g_file_test ("runescape.msi", G_FILE_TEST_EXISTS) == TRUE ) {
 		if(debug)
 			g_fprintf(stdout, "Found runescape.msi, checking size...\n");
@@ -180,9 +169,7 @@ checkwindowsclient()
 	}
 }
 
-void
-updatefromwindowsclient()
-{
+void updatefromwindowsclient(void) {
 	GtkWidget *error_dialog;
 
 	FILE *jarfile;
@@ -227,9 +214,7 @@ updatefromwindowsclient()
 	}
 }
 
-static void
-update_client (GtkButton* button)
-{
+static void update_client (void) {
 	GtkWidget *message_dialog;
 
 	gtk_widget_set_sensitive (button_update, FALSE);
@@ -248,24 +233,18 @@ update_client (GtkButton* button)
 	g_signal_connect (GTK_DIALOG (message_dialog), "response", G_CALLBACK (gtk_main_quit), NULL);
 }
 
-static void
-cancel (GtkButton* button)
-{
+static void cancel (void) {
 	if (dl_state == DL_PROGRESS)
 		dl_state = DL_ABORT;
 	else if (dl_state == DL_NONE)
 		gtk_main_quit ();
 }
 
-static void
-dialog_close (GtkWidget *about_dialog)
-{
+static void dialog_close (GtkWidget *about_dialog) {
 	gtk_widget_destroy (GTK_WIDGET (about_dialog));
 }
 
-static void
-about_open ()
-{
+static void about_open (void) {
 	GtkWidget *about_dialog;
 	gchar *license_trans;
 	const gchar *authors[] = {"Unia (Jente)", "HikariKnight", NULL};
@@ -300,9 +279,7 @@ about_open ()
 	gtk_widget_show (about_dialog);
 }
 
-static GtkWidget*
-create_window (void)
-{
+static GtkWidget* create_window (void) {
 	GtkWidget *label_main, *box_all, *box_button, *box_progressbar, *button_cancel, *button_about;
 
 	/* Set up the TOPLEVEL WINDOW */
@@ -365,16 +342,13 @@ create_window (void)
 	return window;
 }
 
-int
-main (int argc, char *argv[])
-{
+int main (int argc, char *argv[]) {
 	GOptionContext *context;
 
 	context = g_option_context_new ("- update the RuneScape Client");
 	g_option_context_add_main_entries (context, entries, NULL);
 	g_option_context_add_group (context, gtk_get_option_group (TRUE));
-	if (!g_option_context_parse (context, &argc, &argv, &error_parsearg))
-	{
+	if (!g_option_context_parse (context, &argc, &argv, &error_parsearg)) {
 		g_fprintf (stderr, "%s\n", error_parsearg->message);
 		exit (EXIT_FAILURE);
 	}
