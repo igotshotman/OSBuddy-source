@@ -15,17 +15,17 @@ _gitroot="https://github.com/Unia/runescape-client"
 _gitname="$pkgbase"
 
 build() {
-  cd "$srcdir"
-  msg "Connecting to GIT server..."
+	cd "$srcdir"
+	msg "Connecting to GIT server..."
 
-  if [ -d ${_gitname} ] ; then
-    cd ${_gitname}
-    git pull
-    msg "The local files are updated."
-  else
-    git clone ${_gitroot} ${_gitname}
-  fi
-  msg "GIT checkout done or server timeout"
+	if [ -d ${_gitname} ] ; then
+		cd ${_gitname}
+		git pull
+		msg "The local files are updated."
+	else
+		git clone ${_gitroot} ${_gitname}
+	fi
+	msg "GIT checkout done or server timeout"
 }
 
 pkgver() {
@@ -34,7 +34,7 @@ pkgver() {
 }
 
 package() {
-  cd "$srcdir/$pkgbase"
-  make all
-  make DESTDIR="$pkgdir" install
+	cd "$srcdir/$pkgbase"
+	make all
+	make DESTDIR="$pkgdir" install
 }
