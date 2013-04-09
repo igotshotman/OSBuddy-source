@@ -1,6 +1,6 @@
 pkgname=runescape-client-git
 pkgbase=runescape-client
-pkgver=20130305
+pkgver=2013.03.28
 pkgrel=1
 pkgdesc="Runescape Client for Linux"
 arch=(any)
@@ -13,6 +13,11 @@ conflicts=('runescape-client-bin' 'unix-runescape-client')
 
 _gitroot="https://github.com/Unia/runescape-client"
 _gitname="$pkgbase"
+
+pkgver() {
+    cd "$srcdir/$_gitname"
+    git log -1 --format="%cd" --date=short | sed 's|-|.|g'
+}
 
 build() {
   cd "$srcdir"
