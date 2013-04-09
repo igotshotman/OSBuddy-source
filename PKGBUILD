@@ -14,11 +14,6 @@ conflicts=('runescape-client-bin' 'unix-runescape-client')
 _gitroot="https://github.com/Unia/runescape-client"
 _gitname="$pkgbase"
 
-pkgver() {
-    cd "$srcdir/$_gitname"
-    git log -1 --format="%cd" --date=short | sed 's|-|.|g'
-}
-
 build() {
   cd "$srcdir"
   msg "Connecting to GIT server..."
@@ -33,9 +28,13 @@ build() {
   msg "GIT checkout done or server timeout"
 }
 
+pkgver() {
+    cd "$srcdir/$_gitname"
+    git log -1 --format="%cd" --date=short | sed 's\-\.\g'
+}
+
 package() {
   cd "$srcdir/$pkgbase"
   make all
   make DESTDIR="$pkgdir" install
 }
-md5sums=()
