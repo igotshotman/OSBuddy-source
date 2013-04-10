@@ -1,40 +1,31 @@
+# Maintainer: Unia <jthidskes@outlook.com> 
+
 pkgname=runescape-client-git
-pkgbase=runescape-client
-pkgver=2013.03.28
+_gitname=runescape-client
+pkgver=2013.04.10
 pkgrel=1
 pkgdesc="Runescape Client for Linux"
-arch=(any)
+arch=('i686' 'x86_64')
 url="https://github.com/Unia/runescape-client"
-license=(GPL2)
+license=('GPL2')
 depends=('java-runtime' 'curl' 'p7zip' 'gtk3' 'webkitgtk3')
+makedepends=('git')
 optdepends=('pulseaudio: have sound played through pulseaudio'
-			'alsa-oss: have sound played through alsa')
-conflicts=('runescape-client-bin' 'unix-runescape-client')
-
-_gitroot="https://github.com/Unia/runescape-client"
-_gitname="$pkgbase"
-
-build() {
-	cd "$srcdir"
-	msg "Connecting to GIT server..."
-
-	if [ -d ${_gitname} ] ; then
-		cd ${_gitname}
-		git pull
-		msg "The local files are updated."
-	else
-		git clone ${_gitroot} ${_gitname}
-	fi
-	msg "GIT checkout done or server timeout"
-}
+            'alsa-oss: have sound player through alsa')
+source=('git://github.com/Unia/runescape-client.git')
+md5sums=('SKIP')
 
 pkgver() {
-    cd "$srcdir/$_gitname"
-    git log -1 --format="%cd" --date=short | sed 's\-\.\g'
+  cd $_gitname
+  git log -1 --format="%cd" --date=short | sed 's|-|.|g'
+}
+
+build() {
+  cd $_gitname
+  make
 }
 
 package() {
-	cd "$srcdir/$pkgbase"
-	make all
-	make DESTDIR="$pkgdir" install
+  cd $_gitname
+  make PREFIX=/usr DESTDIR="$pkgdir" install
 }
