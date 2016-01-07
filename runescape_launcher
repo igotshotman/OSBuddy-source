@@ -1,0 +1,77 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+This script is a simple launcher around the two scripts. It shows a WebKit WebView displaying the
+latest updates (using http://services/runescape.com/m=news/), together with one button allowing
+one to play (see the runescape script) and another button allowing one to update the RuneScape
+game client (see the runescape_update_client script).
+
+For licensing information, please see the LICENSE file.
+"""
+
+import sys
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('WebKit', '3.0')
+
+from gi.repository import GLib, Gtk, WebKit
+
+import util
+
+class RLWindow(Gtk.Window):
+    """
+    The RuneScape Launcher Window is a simple window showing a WebKit WebView, which displays
+    the latest RuneScape news using http://services.runescape.com/m=news/. From this window, the
+    RuneScape game client can be started or updated.
+    """
+    def __init__(self, *args, **kwargs):
+        super(RLWindow, self).__init__(*args, **kwargs)
+
+        self.connect("delete-event", Gtk.main_quit)
+        self.set_title("RuneScape Launcher")
+
+        self._setup_headerbar()
+        self._setup_webview()
+
+    def _setup_headerbar(self):
+        headerbar = Gtk.HeaderBar()
+        headerbar.set_title(self.get_title())
+        headerbar.set_show_close_button(True)
+        self.set_titlebar(headerbar)
+
+        play = Gtk.Button.new_from_icon_name("system-run-symbolic", Gtk.IconSize.BUTTON)
+        play.connect("clicked", self._on_button_clicked, "runescape")
+        headerbar.pack_start(play)
+        update = Gtk.Button.new_from_icon_name("software-update-available-symbolic",
+                                               Gtk.IconSize.BUTTON)
+        update.connect("clicked", self._on_button_clicked, "runescape-update-client")
+        headerbar.pack_start(update)
+
+    def _setup_webview(self):
+        scroll = Gtk.ScrolledWindow()
+        scroll.set_property("shadow-type", Gtk.ShadowType.IN)
+        self.add(scroll)
+
+        webview = WebKit.WebView()
+        webview.load_uri("http://services.runescape.com/m=news/")
+        scroll.add(webview)
+
+    def _on_button_clicked(self, widget, user_data):
+        program = GLib.find_program_in_path(user_data)
+        if program is None:
+            util.warn("Cannot find {} in PATH.".format(user_data))
+            return
+        util.call_asynchronous(program)
+        Gtk.main_quit()
+
+def main():
+    """ Initialises Gtk, creates the RuneScape Launcher Window and enters the main loop."""
+    Gtk.init(sys.argv)
+    window = RLWindow()
+    window.show_all()
+    Gtk.main()
+
+if __name__ == "__main__":
+    main()
+

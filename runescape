@@ -1,0 +1,121 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+""" A simple script to launch the RuneScape game client on Linux systems. No regards have been made
+towards portability, but changes required to make it run on other operating systems should be
+minimal.
+
+For convenience, the script parses a configuration file which can be used to automatically start a
+certain world and to feed options to the JVM. In-game language settings are also supported by
+parsing the jagexappletviewer.preferences file.
+
+A nice clean up that is applied is setting Java's -Duser.home to the configuration directory used
+by this script ($XDG_CONFIG_HOME/runescape by default). This results in a cleaner home directory,
+because Jagex' files will now end up there instead.
+
+Please note that the script really is simple. That is, it launches the regular RuneScape game
+client and does nothing more. If you need more functionality (e.g. different profiles, launching
+other game modes, et cetera) please see HikariKnight's rsu-client:
+https://github.com/HikariKnight/rsu-client.
+
+For licensing information, please see the LICENSE file.
+"""
+
+import configparser
+import sys
+import os
+
+from xdg.BaseDirectory import xdg_config_home
+
+import util
+
+def parse_language(applet_preferences):
+    """
+    Parses the first line of jagexappletviewer.preferences to determine which
+    language to use. Every language has its own number (for example, English is 0 and German is
+    1), which gets placed into the URL to tell the RuneScape game client which language to use.
+
+    This file contains more settings (Member=yes/no), but the language line is always the first.
+    The URL only requires the number, which is the second last character in the line (readline
+    appends the newline too!
+
+    Args:
+        applet_preferences: the path to the jagexappletviewer.preferences file.
+    Returns:
+        The number representing the language to use, as a string.
+    """
+    if not os.path.isfile(applet_preferences):
+        util.warn("Unable to read {}. Falling back to English\n".format(applet_preferences))
+        return "0"
+    with open(applet_preferences, "r") as applet_preferences:
+        language = applet_preferences.readline()
+    return language[-2]
+
+def parse_config_file(config_file):
+    """
+    This method parses the configuration file used to provide arguments to Java and
+    the RuneScape game client. Default arguments are provided in this method, in case the file
+    itself or lines within it are missing.
+
+    Args:
+        config_file: the configuration file to read.
+    Returns:
+        A dictionary containing the read configuration.
+    """
+    config = configparser.ConfigParser()
+    config.read(config_file)
+
+    settings = {}
+    settings["world"] = config.get("RuneScape", "world", fallback="www")
+    settings["ram"] = config.get("Java", "ram", fallback="-Xmx1024m")
+    settings["stacksize"] = config.get("Java", "stacksize", fallback="-Xss1m")
+    return settings
+
+def setup(config_dir, bin_dir):
+    """
+    Checks if all required files are present and reads the configuration.
+
+    Args:
+        config_dir: the directory containing the configuration files.
+        bin_dir: the directory containing the RuneScape client jar.
+    Returns:
+        The dictionary created by parse_config_file.
+    """
+    applet_viewer = os.path.join(bin_dir, "jagexappletviewer.jar")
+    applet_preferences = os.path.join(config_dir, "jagexappletviewer.preferences")
+    settings_file = os.path.join(config_dir, "settings.ini")
+
+    if not os.path.isdir(config_dir):
+        util.die("Could not find {}. Please run runescape_update_client to set ".format(config_dir)
+                 + "up the required files and directories")
+    if not os.path.isdir(bin_dir) or not os.path.isfile(applet_viewer):
+        util.die("Could not find {}. Please run runescape_update_client to install it."
+                 .format(applet_viewer))
+    if not os.path.isfile(settings_file):
+        util.warn("Could not find {}. Default settings will be used".format(settings_file))
+    settings = parse_config_file(settings_file)
+    settings["language"] = parse_language(applet_preferences)
+    return settings
+
+def main():
+    """Creates the command used to launch the RuneScape game client and, well, launches it."""
+    config_dir = os.path.join(xdg_config_home, "runescape")
+    bin_dir = os.path.join(config_dir, "bin")
+
+    settings = setup(config_dir, bin_dir)
+    user_home = "-Duser.home={}".format(config_dir)
+    url = "-Dcom.jagex.config=http://{}.runescape.com/k=3/l={}/jav_config.ws".format(
+        settings["world"], settings["language"])
+
+    launch_command = ["java", "-cp", "jagexappletviewer.jar", url, settings["ram"],
+                      settings["stacksize"], user_home, "jagexappletviewer", "/share"]
+
+    os.chdir(bin_dir)
+    if util.call_asynchronous(launch_command):
+        sys.exit(0)
+    else:
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
+

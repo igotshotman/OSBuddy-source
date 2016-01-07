@@ -1,0 +1,140 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+This script allows one to easily (graphically) update the RuneScape game client. It does so by
+downloading the official Windows client from Jagex and extracting the JAR file.
+
+For licensing information, please see the LICENSE file.
+"""
+
+import os
+import sys
+import urllib.error
+import urllib.request
+
+from xdg.BaseDirectory import xdg_config_home
+
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
+
+import util
+
+class RUWindow(Gtk.Window):
+    """
+    The RuneScape Update Window is a simple window allowing one to graphically update the
+    RuneScape game client.
+    """
+    def __init__(self, *args, **kwargs):
+        super(RUWindow, self).__init__(*args, **kwargs)
+
+        self._url = "https://www.runescape.com/downloads/runescape.msi"
+
+        self.connect("delete-event", Gtk.main_quit)
+        self.set_title("Update the RuneScape game client")
+        self.set_resizable(False)
+        self.set_border_width(5)
+
+        self._setup_headerbar()
+        self._setup_content()
+
+    def _setup_headerbar(self):
+        headerbar = Gtk.HeaderBar()
+        headerbar.set_title(self.get_title())
+        headerbar.set_show_close_button(True)
+        self.set_titlebar(headerbar)
+
+        update = Gtk.Button.new_from_icon_name("software-update-available-symbolic",
+                                               Gtk.IconSize.BUTTON)
+        update.connect("clicked", self._on_update_clicked)
+        headerbar.pack_start(update)
+
+    def _setup_content(self):
+        label = Gtk.Label("Due to legal reasons, the file jagexappletviewer.jar is not available\n"
+                          + "and/or downloadable in certain countries. For this script to work you "
+                          + "must be\nable to download the official RuneScape game client for "
+                          + "extraction.\n\nPlease confirm you are elligable to download the "
+                          + "official Windows client from Jagex\nbefore continuing.")
+        label.set_justify(Gtk.Justification.CENTER)
+        label.set_line_wrap(False)
+
+        self._progressbar = Gtk.ProgressBar()
+        self._progressbar.set_show_text(False)
+
+        box_all = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        box_all.pack_start(label, True, True, 0)
+        box_all.pack_start(self._progressbar, True, True, 10)
+        self.add(box_all)
+
+    def _on_update_clicked(self, widget):
+        widget.set_sensitive(False)
+
+        bin_dir = os.path.join(xdg_config_home, "runescape", "bin")
+        if not os.path.isdir(bin_dir):
+            os.makedirs(bin_dir, 0o755)
+        os.chdir(bin_dir)
+        file_size = self._get_filesize()
+        if not os.path.isfile("runescape.msi") or os.stat("runescape.msi").st_size != file_size:
+            self._download_windows_client()
+        self._update_from_windows_client()
+        self._show_dialog("Done running the update process!",
+                          "You can now launch the runescape script to start playing!")
+
+    def _get_filesize(self):
+        url = urllib.request.urlopen(self._url)
+        metadata = url.info()
+        length = metadata.get("Content-Length")
+        if length is not None:
+            return int(length)
+        return -1
+
+    def _download_windows_client(self):
+        try:
+            urllib.request.urlretrieve(self._url, self._url.split('/')[-1],
+                                       reporthook=self._update_progressbar)
+        except urllib.error.ContentTooShortError as err:
+            self._show_dialog("Could not download the official Windows client!", str(err))
+
+    def _update_from_windows_client(self):
+        # FIXME: using Shell=True is unsafe, but subprocess.check_output does not work with pipes.
+        extract = util.check_output("7z l runescape.msi | awk '/JagexAppletViewerJarFile/{print $5"
+                                    + "}'", shell=True)
+        if extract is None:
+            util.die("Do you have p7zip installed?")
+        # Convert to text, not bytes. Strip newline.
+        extract = extract.decode('utf-8')[:-1]
+        util.call_synchronous(["7z", "e", "-y", "runescape.msi", " ", extract])
+        if not os.path.isfile(extract):
+            self._show_dialog("Something went wrong. Please relaunch this script",
+                              "Could not extract the JAR from the Windows client.")
+        os.remove("runescape.msi")
+        os.rename(extract, "jagexappletviewer.jar")
+
+    def _update_progressbar(self, blocks, current_down, total_down):
+        self._progressbar.set_fraction((blocks * current_down) / total_down)
+        while Gtk.events_pending():
+            Gtk.main_iteration()
+
+    def _show_dialog(self, message, *secondary_message):
+        dialog = Gtk.MessageDialog(self,
+                                   Gtk.DialogFlags.MODAL |
+                                   Gtk.DialogFlags.USE_HEADER_BAR |
+                                   Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                                   Gtk.MessageType.INFO,
+                                   Gtk.ButtonsType.OK,
+                                   message)
+        dialog.format_secondary_text(*secondary_message)
+        dialog.show_all()
+        dialog.connect("response", Gtk.main_quit)
+
+def main():
+    """ Initialises Gtk, creates the RuneScape Update Window and enters the main loop."""
+    Gtk.init(sys.argv)
+    window = RUWindow()
+    window.show_all()
+    Gtk.main()
+
+if __name__ == "__main__":
+    main()
+
